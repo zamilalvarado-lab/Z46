@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<title>Z46 · Dashboard v4</title>
+<style>
+:root{
+  --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a26;--surface3:#22223a;
+  --border:#2a2a45;--text:#e8e8ff;--muted:#6666aa;--muted2:#3a3a5a;
+  --accent:#00d4ff;--accent2:#7b4fff;--accent3:#00ff9d;
+  --gold:#ffd700;--red:#ff4466;--orange:#ff8c42;--green:#00d084;
+  --glow:0 0 20px rgba(0,212,255,.3);--glow2:0 0 30px rgba(123,79,255,.4);
+  --r:14px;--rs:10px;--rx:7px;
+}
+.light{
+  --bg:#f0f4ff;--surface:#fff;--surface2:#e8eeff;--surface3:#dde5ff;
+  --border:#c5d0ff;--text:#1a1a3a;--muted:#7788bb;--muted2:#aabbdd;
+  --accent:#0088cc;--accent2:#5533cc;--accent3:#00aa66;
+  --gold:#cc8800;--red:#cc2244;--orange:#cc6622;--green:#00aa66;
+  --glow:0 2px 20px rgba(0,136,204,.15);--glow2:0 2px 20px rgba(85,51,204,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;overscroll-behavior:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding-bottom:90px;transition:background .3s,color .3s}
+button,input,select,textarea{font-family:inherit;-webkit-appearance:none;appearance:none;border:none;background:none;color:inherit}
+button{cursor:pointer}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,.012) 2px,rgba(0,212,255,.012) 4px);pointer-events:none;z-index:900}
+.light::before{display:none}
+
+/* ══ SIDEBAR ══ */
+.sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.sidebar-overlay.open{display:block}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:280px;background:var(--surface);border-right:1px solid var(--border);z-index:301;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column}
+.sidebar.open{transform:translateX(0)}
+.sidebar-header{padding:20px 16px 16px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,var(--surface),var(--surface2))}
+.sidebar-logo{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.sidebar-badge{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff;flex-shrink:0}
+.sidebar-name{font-size:16px;font-weight:900;color:var(--accent)}
+.sidebar-sub{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.sidebar-xp{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rx);padding:10px;margin-top:2px}
+.sidebar-xp-label{font-size:9px;color:var(--accent);font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.sidebar-xp-bar{background:var(--surface3);border-radius:999px;height:5px;overflow:hidden;margin-bottom:4px}
+.sidebar-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--accent3));border-radius:999px;transition:width .5s}
+.sidebar-xp-txt{font-size:10px;color:var(--muted);font-weight:700}
+.sidebar-nav{padding:12px 8px;flex:1}
+.sidebar-section{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--muted2);padding:8px 8px 4px;margin-top:8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rs);font-size:13px;font-weight:700;color:var(--muted);transition:all .15s;margin-bottom:2px;cursor:pointer;width:100%;text-align:left;background:none}
+.sidebar-item:active{transform:scale(.97)}
+.sidebar-item.active{background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2)}
+.sidebar-item.locked-si{opacity:.45;cursor:not-allowed}
+.sidebar-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.sidebar-lbl{flex:1}
+.sidebar-badge-pill{font-size:9px;background:var(--surface3);border:1px solid var(--border);border-radius:999px;padding:2px 7px;color:var(--muted2)}
+.sidebar-footer{padding:12px 8px 20px;border-top:1px solid var(--border)}
+.sidebar-theme{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--rs);background:var(--surface2);border:1px solid var(--border)}
+.sidebar-theme-lbl{font-size:12px;font-weight:700;color:var(--muted)}
+.theme-toggle{display:flex;align-items:center;gap:6px}
+.theme-toggle-btn{width:44px;height:24px;border-radius:999px;background:var(--surface3);border:1.5px solid var(--border);position:relative;cursor:pointer;transition:.2s}
+.theme-toggle-btn.on{background:var(--accent);border-color:var(--accent)}
+.theme-toggle-knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.theme-toggle-btn.on .theme-toggle-knob{transform:translateX(20px)}
+
+/* ══ HEADER ══ */
+.hdr{background:linear-gradient(135deg,var(--surface),var(--surface2));border-bottom:1px solid var(--border);padding:14px 14px 11px;position:sticky;top:0;z-index:50}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.hamburger{width:38px;height:38px;border-radius:var(--rx);background:var(--surface3);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;cursor:pointer}
+.hamburger span{display:block;width:16px;height:2px;background:var(--text);border-radius:999px;transition:.2s}
+.logo{display:flex;align-items:center;gap:8px}
+.logo-badge{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#fff;letter-spacing:-1px;box-shadow:var(--glow2);flex-shrink:0}
+.logo-name{font-size:17px;font-weight:900;letter-spacing:2px;color:var(--accent);text-shadow:0 0 20px rgba(0,212,255,.5)}
+.light .logo-name{text-shadow:none}
+.logo-sub{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.date-chip{background:var(--surface3);border:1px solid var(--border);border-radius:999px;padding:4px 10px;font-size:10px;color:var(--muted);font-weight:600}
+.xp-row{display:flex;align-items:center;gap:8px}
+.xp-label{font-size:10px;color:var(--accent);font-weight:800;letter-spacing:.1em;white-space:nowrap}
+.xp-bar-wrap{flex:1;background:var(--surface3);border-radius:999px;height:5px;overflow:hidden;border:1px solid var(--border)}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--accent3));border-radius:999px;transition:width .6s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px rgba(0,212,255,.5)}
+.light .xp-fill{box-shadow:none}
+.xp-pct{font-size:10px;color:var(--accent);font-weight:800;min-width:60px;text-align:right}
+
+/* ══ DOLAR BAR ══ */
+.dolar-bar{background:var(--surface2);border-bottom:1px solid var(--border);padding:7px 14px;display:flex;align-items:center;gap:8px;font-size:11px}
+.dolar-label{color:var(--muted);font-weight:600}
+.dolar-val{color:var(--gold);font-weight:800}
+.dolar-time{color:var(--muted);font-size:9px;margin-left:auto}
+.dolar-refresh{color:var(--accent);font-size:14px;cursor:pointer;padding:2px 6px}
+
+/* ══ NAV ══ */
+.nav{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--surface);border-bottom:1px solid var(--border);padding:0 8px}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{padding:11px 14px;font-size:11px;font-weight:800;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0;margin-bottom:-1px;letter-spacing:.05em;transition:color .2s,border-color .2s;background:none}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-btn.locked{opacity:.4;cursor:not-allowed}
+
+/* ══ PANELS ══ */
+.panel{display:none;padding:12px;max-width:680px;margin:0 auto;animation:fadeIn .2s ease}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══ LOCKED PANEL ══ */
+.locked-panel{text-align:center;padding:50px 20px}
+.locked-icon{font-size:48px;margin-bottom:12px;opacity:.5}
+.locked-title{font-size:16px;font-weight:800;color:var(--muted);margin-bottom:6px}
+.locked-desc{font-size:12px;color:var(--muted2);line-height:1.6;max-width:280px;margin:0 auto}
+.unlock-date{margin-top:16px;display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:6px 16px;font-size:11px;color:var(--accent);font-weight:700}
+
+/* ══ SECTION ══ */
+.sec{margin-bottom:10px}
+.sec-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ══ CARD ══ */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--glow);transition:border-color .2s}
+.light .card{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+
+/* ══ MISIONES ══ */
+.mision-item{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;transition:all .2s;cursor:pointer}
+.mision-item.done{opacity:.5;background:var(--surface)}
+.mision-item.done .mision-label{text-decoration:line-through}
+.mision-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
+.mision-item.done .mision-check{background:var(--accent3);border-color:var(--accent3);color:#000}
+.mision-label{flex:1;font-size:13px;line-height:1.3}
+.mision-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.mision-xp{font-size:10px;color:var(--accent);font-weight:800;white-space:nowrap}
+.mision-expand{font-size:11px;color:var(--muted);padding:4px 6px;border-radius:4px;background:var(--surface3)}
+.mision-del{font-size:11px;color:var(--muted);padding:4px}
+.add-mision-row{display:flex;gap:6px;margin-top:8px}
+.mision-input{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rx);padding:9px 12px;font-size:13px;color:var(--text)}
+.mision-input:focus{outline:none;border-color:var(--accent)}
+.mision-add-btn{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;border-radius:var(--rx);padding:9px 14px;font-size:13px;font-weight:800;box-shadow:var(--glow)}
+
+/* ══ MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:flex-end;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 16px 34px;width:100%;border-top:1px solid var(--border);animation:slideUp .25s cubic-bezier(.4,0,.2,1);max-height:85vh;overflow-y:auto;position:relative}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:999px;margin:0 auto 16px}
+.modal-title{font-size:17px;font-weight:900;margin-bottom:4px;color:var(--accent)}
+.modal-sub{font-size:11px;color:var(--muted);margin-bottom:16px}
+.modal-close{position:absolute;top:16px;right:16px;font-size:18px;color:var(--muted);padding:4px 8px;background:none;border:none;cursor:pointer}
+.modal-label{font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;display:block;margin-top:10px}
+.modal-input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rx);padding:12px;color:var(--text);font-size:14px;margin-bottom:4px}
+.modal-input:focus{outline:none;border-color:var(--accent)}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+.modal-btn{flex:1;padding:13px;border-radius:var(--rx);font-size:14px;font-weight:800;text-align:center;cursor:pointer;border:none}
+.modal-btn.cancel{background:var(--surface3);color:var(--muted)}
+.modal-btn.confirm{background:var(--accent);color:var(--bg);box-shadow:var(--glow)}
+
+/* ══ WORKOUT ══ */
+.workout-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px}
+.workout-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.workout-detail{font-size:11px;color:var(--muted);margin-bottom:4px}
+.workout-sets{display:inline-block;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);border-radius:999px;padding:2px 10px;font-size:10px;font-weight:700;color:var(--accent)}
+.workout-check-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.set-check{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:.15s;background:var(--surface3)}
+.set-check.done{background:var(--accent3);border-color:var(--accent3);color:#000}
+
+/* ══ HABILIDADES ══ */
+.skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.skill-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.skill-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(0,212,255,.03));pointer-events:none}
+.skill-card.locked-skill{opacity:.55}
+.skill-card:active{transform:scale(.97)}
+.skill-icon{font-size:28px;margin-bottom:6px;line-height:1}
+.skill-name{font-size:12px;font-weight:800;margin-bottom:4px;line-height:1.2}
+.skill-lock{font-size:10px;color:var(--muted)}
+.skill-level{display:flex;gap:3px;justify-content:center;margin-top:6px}
+.skill-price{font-size:10px;color:var(--gold);font-weight:700;margin-top:4px}
+.skill-detail-icon{font-size:48px;text-align:center;margin-bottom:8px}
+.skill-detail-name{font-size:20px;font-weight:900;text-align:center;margin-bottom:4px}
+.skill-detail-price{text-align:center;color:var(--gold);font-weight:800;font-size:14px;margin-bottom:16px}
+.skill-req{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:8px}
+.skill-req-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:8px}
+.skill-req-item{font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.skill-req-item:last-child{border-bottom:none}
+.skill-levels{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px}
+.skill-level-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.skill-level-item:last-child{border-bottom:none}
+.lvl-badge{width:32px;height:32px;border-radius:50%;background:var(--surface3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.lvl-badge.gold{background:rgba(255,215,0,.15);border-color:rgba(255,215,0,.4);color:var(--gold)}
+.lvl-info{flex:1}
+.lvl-name{font-size:12px;font-weight:700}
+.lvl-desc{font-size:10px;color:var(--muted)}
+
+/* ══ FINANZAS ══ */
+.fin-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.fin-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:12px;text-align:center}
+.fin-card-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.fin-card-val{font-size:20px;font-weight:900}
+.fin-card.ing .fin-card-val{color:var(--accent3)}
+.fin-card.gas .fin-card-val{color:var(--red)}
+.fin-card.saldo .fin-card-val{color:var(--gold)}
+.fin-full{grid-column:1/-1}
+.tx-row{display:flex;align-items:center;gap:8px;padding:9px 10px;background:var(--surface2);border-radius:var(--rx);margin-bottom:5px;border:1px solid var(--border)}
+.tx-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tx-dot.ing{background:var(--accent3)}.tx-dot.gas{background:var(--red)}.tx-dot.deu{background:var(--orange)}
+.tx-desc{flex:1;font-size:12px}
+.tx-val{font-size:12px;font-weight:800}
+.tx-val.ing{color:var(--accent3)}.tx-val.gas{color:var(--red)}.tx-val.deu{color:var(--orange)}
+.tx-del{font-size:10px;color:var(--muted);padding:4px 6px;border-radius:4px;background:var(--surface3);cursor:pointer}
+.add-form{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:10px}
+.form-row{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.fin-input{flex:1;min-width:100px;background:var(--surface3);border:1.5px solid var(--border);border-radius:var(--rx);padding:8px 10px;font-size:13px;color:var(--text)}
+.fin-input:focus{outline:none;border-color:var(--accent)}
+.fin-select{background:var(--surface3);border:1.5px solid var(--border);border-radius:var(--rx);padding:8px 10px;font-size:12px;color:var(--text)}
+.type-row{display:flex;gap:6px;margin-bottom:8px}
+.type-opt{flex:1;padding:7px;border-radius:var(--rx);border:1.5px solid var(--border);font-size:11px;font-weight:700;text-align:center;color:var(--muted);transition:.15s;cursor:pointer}
+.type-opt.sel-ing{border-color:var(--accent3);color:var(--accent3);background:rgba(0,255,157,.08)}
+.type-opt.sel-gas{border-color:var(--red);color:var(--red);background:rgba(255,68,102,.08)}
+.type-opt.sel-deu{border-color:var(--orange);color:var(--orange);background:rgba(255,140,66,.08)}
+.add-btn{width:100%;padding:10px;border-radius:var(--rx);background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:13px;font-weight:800;cursor:pointer}
+
+/* ══ METAS AHORRO ══ */
+.meta-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:8px;position:relative}
+.meta-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px}
+.meta-name{font-size:13px;font-weight:700;flex:1;line-height:1.3}
+.meta-vals{font-size:11px;color:var(--muted);white-space:nowrap}
+.meta-bar-wrap{background:var(--surface3);border-radius:999px;height:6px;overflow:hidden;margin-bottom:4px}
+.meta-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .5s}
+.meta-pct{font-size:10px;color:var(--accent);font-weight:700;margin-bottom:8px}
+.meta-actions{display:flex;gap:6px;margin-top:8px}
+.meta-add-row{display:flex;gap:6px;flex:1}
+.meta-add-input{flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:var(--rx);padding:6px 8px;font-size:12px;color:var(--text)}
+.meta-add-input:focus{outline:none;border-color:var(--accent)}
+.meta-add-btn{background:var(--accent3);color:#000;border-radius:var(--rx);padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer}
+.meta-edit-btn{background:var(--surface3);border:1px solid var(--border);border-radius:var(--rx);padding:6px 10px;font-size:11px;color:var(--muted);cursor:pointer}
+.meta-edit-btn:hover{border-color:var(--accent);color:var(--accent)}
+.meta-del-btn{background:var(--surface3);border:1px solid var(--border);border-radius:var(--rx);padding:6px 10px;font-size:11px;color:var(--muted);cursor:pointer}
+.meta-del-btn:hover{border-color:var(--red);color:var(--red)}
+.add-meta-btn{width:100%;padding:10px;border-radius:var(--rx);background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:13px;font-weight:800;margin-top:6px;cursor:pointer}
+.meta-completed{background:rgba(0,208,132,.08);border-color:rgba(0,208,132,.3)}
+.meta-completed .meta-bar-fill{background:linear-gradient(90deg,var(--green),var(--accent3))}
+
+/* ══ CONVERSION ══ */
+.conv-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:10px}
+.conv-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.conv-input{flex:1;background:var(--surface3);border:1.5px solid var(--border);border-radius:var(--rx);padding:8px 10px;font-size:14px;font-weight:700;color:var(--text)}
+.conv-input:focus{outline:none;border-color:var(--accent)}
+.conv-label{font-size:11px;color:var(--muted);font-weight:700;min-width:32px}
+.conv-result{font-size:18px;font-weight:900;color:var(--gold);text-align:center;padding:8px;background:var(--surface3);border-radius:var(--rx)}
+
+/* ══ POMODORO ══ */
+.pomo-wrap{text-align:center;padding:10px 0}
+.pomo-ring{width:180px;height:180px;border-radius:50%;border:3px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 16px;position:relative;background:radial-gradient(circle,var(--surface2),var(--surface));box-shadow:var(--glow2),inset 0 0 30px rgba(0,0,0,.3)}
+.light .pomo-ring{box-shadow:0 4px 24px rgba(85,51,204,.15)}
+.pomo-ring svg{position:absolute;top:-3px;left:-3px;width:calc(100%+6px);height:calc(100%+6px);transform:rotate(-90deg)}
+.pomo-ring circle{fill:none;stroke:var(--accent2);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .5s linear}
+.pomo-time{font-size:42px;font-weight:900;letter-spacing:-2px;color:var(--text);line-height:1}
+.pomo-label{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.pomo-mode-row{display:flex;gap:6px;justify-content:center;margin-bottom:14px}
+.pomo-mode-btn{padding:6px 14px;border-radius:999px;border:1.5px solid var(--border);font-size:11px;font-weight:700;color:var(--muted);transition:.15s;cursor:pointer;background:none}
+.pomo-mode-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(123,79,255,.1)}
+.pomo-btns{display:flex;gap:8px;justify-content:center}
+.pomo-btn{padding:12px 24px;border-radius:var(--rs);font-size:14px;font-weight:800;transition:all .15s;cursor:pointer}
+.pomo-btn.start{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;box-shadow:var(--glow2)}
+.pomo-btn.reset{background:var(--surface2);border:1.5px solid var(--border);color:var(--muted)}
+.pomo-sessions{font-size:12px;color:var(--muted);margin-top:12px}
+.pomo-sessions span{color:var(--gold);font-weight:800}
+.tip-card{background:linear-gradient(135deg,rgba(0,212,255,.08),rgba(123,79,255,.08));border:1px solid rgba(0,212,255,.2);border-radius:var(--rs);padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.5;color:var(--text)}
+
+/* ══ EJERCICIO ══ */
+.fase-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent2),var(--accent));border-radius:999px;padding:5px 14px;font-size:11px;font-weight:800;color:#fff;margin-bottom:10px}
+.ejercicio-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.ej-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:.2s}
+.ejercicio-item.done .ej-check{background:var(--accent3);border-color:var(--accent3);color:#000}
+.ejercicio-item.done .ej-label{text-decoration:line-through;opacity:.5}
+.ej-label{flex:1;font-size:12px;line-height:1.4}
+.ej-detail{font-size:10px;color:var(--muted)}
+.ej-sets{font-size:10px;color:var(--accent);font-weight:700;white-space:nowrap}
+
+/* ══ LECTURA ══ */
+.book-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:14px;margin-bottom:10px}
+.book-title{font-size:14px;font-weight:800;margin-bottom:2px}
+.book-author{font-size:11px;color:var(--muted);margin-bottom:10px}
+.book-prog{display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px}
+.book-prog-label{color:var(--muted)}
+.book-prog-val{color:var(--accent);font-weight:800}
+.book-bar-wrap{background:var(--surface3);border-radius:999px;height:8px;overflow:hidden;margin-bottom:8px}
+.book-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .5s}
+.book-update-row{display:flex;gap:6px}
+.book-update-input{flex:1;background:var(--surface3);border:1px solid var(--border);border-radius:var(--rx);padding:6px 8px;font-size:12px;color:var(--text)}
+.book-update-input:focus{outline:none;border-color:var(--accent)}
+.book-update-btn{background:var(--accent2);color:#fff;border-radius:var(--rx);padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer}
+
+/* ══ MATERIALES ══ */
+.mat-header{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.mat-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.mat-stat{text-align:center;padding:8px;background:var(--surface2);border-radius:var(--rs);border:1px solid var(--border)}
+.mat-stat-num{font-size:20px;font-weight:900}
+.mat-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.mat-stat.tengo .mat-stat-num{color:var(--green)}
+.mat-stat.faltan .mat-stat-num{color:var(--red)}
+.mat-stat.costo .mat-stat-num{color:var(--gold)}
+.mat-prog-header{display:flex;justify-content:space-between;margin-bottom:6px;font-size:11px}
+.mat-prog-bar{background:var(--surface3);border-radius:999px;height:6px;overflow:hidden}
+.mat-prog-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--accent3));border-radius:999px;transition:width .5s}
+.filters{display:flex;gap:6px;padding:8px 0;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{padding:6px 12px;border-radius:999px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:.15s;cursor:pointer}
+.fbtn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+
+/* ══ REDES BLOQUEADO ══ */
+.redes-lock{text-align:center;padding:40px 20px}
+.redes-lock-icon{font-size:56px;margin-bottom:12px;opacity:.6}
+.redes-lock-title{font-size:18px;font-weight:800;color:var(--muted);margin-bottom:8px}
+.redes-lock-desc{font-size:12px;color:var(--muted2);line-height:1.7;max-width:300px;margin:0 auto 20px}
+.redes-lock-badge{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:8px 20px;font-size:11px;color:var(--muted);font-weight:700}
+
+/* ══ BOTTOM BAR ══ */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,15,.95);border-top:1px solid var(--border);padding:8px 0 10px;display:flex;justify-content:space-around;z-index:100;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.light .bottom-bar{background:rgba(240,244,255,.95)}
+.bb-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 8px;cursor:pointer;background:none;border:none}
+.bb-item:active{transform:scale(.9)}
+.bb-icon{font-size:20px;line-height:1}
+.bb-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.bb-item.active .bb-lbl{color:var(--accent)}
+.bb-item.active .bb-icon{filter:drop-shadow(0 0 4px rgba(0,212,255,.6))}
+.light .bb-item.active .bb-icon{filter:none}
+
+/* ══ TOAST / BADGE ══ */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface2);border:1px solid var(--accent);border-radius:999px;padding:8px 20px;font-size:12px;font-weight:700;color:var(--accent);z-index:999;transition:transform .3s cubic-bezier(.4,0,.2,1);white-space:nowrap;box-shadow:var(--glow)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.save-badge{position:fixed;top:16px;right:16px;background:var(--accent3);color:#000;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:800;opacity:0;transition:opacity .3s;z-index:998}
+.save-badge.show{opacity:1}
+.empty-state{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+
+/* ══ CALENDARIO ══ */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nav-btn{width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.cal-nav-btn:active{transform:scale(.9)}
+.cal-month{font-size:16px;font-weight:900;color:var(--accent)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:14px}
+.cal-day-label{text-align:center;font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase;padding:4px 0}
+.cal-day{aspect-ratio:1;border-radius:var(--rx);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;position:relative;border:1px solid transparent;gap:1px}
+.cal-day:active{transform:scale(.92)}
+.cal-day.empty{cursor:default;opacity:0}
+.cal-day.today{border-color:var(--accent);background:rgba(0,212,255,.1);color:var(--accent)}
+.cal-day.active-full{background:rgba(0,255,157,.18);border-color:rgba(0,255,157,.4)}
+.cal-day.active-partial{background:rgba(0,212,255,.12);border-color:rgba(0,212,255,.25)}
+.cal-day.missed{background:rgba(255,68,102,.1);border-color:rgba(255,68,102,.2)}
+.cal-day.logro{background:rgba(255,215,0,.15);border-color:rgba(255,215,0,.4)}
+.cal-day.has-photo::after{content:'📷';position:absolute;bottom:1px;right:1px;font-size:7px}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cal-dot.full{background:var(--accent3)}
+.cal-dot.partial{background:var(--accent)}
+.cal-dot.missed{background:var(--red)}
+.cal-dot.logro{background:var(--gold)}
+.cal-day-num{font-size:11px;font-weight:800;line-height:1}
+.cal-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs)}
+.cal-leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.cal-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+/* Day detail modal */
+.day-modal-date{font-size:13px;color:var(--muted);margin-bottom:14px;text-align:center}
+.day-status-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.day-status-opt{padding:10px;border-radius:var(--rs);border:1.5px solid var(--border);background:var(--surface2);font-size:12px;font-weight:700;text-align:center;cursor:pointer;transition:.15s}
+.day-status-opt.sel-full{border-color:var(--accent3);background:rgba(0,255,157,.1);color:var(--accent3)}
+.day-status-opt.sel-partial{border-color:var(--accent);background:rgba(0,212,255,.1);color:var(--accent)}
+.day-status-opt.sel-missed{border-color:var(--red);background:rgba(255,68,102,.08);color:var(--red)}
+.day-status-opt.sel-logro{border-color:var(--gold);background:rgba(255,215,0,.1);color:var(--gold)}
+.day-note-input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--rx);padding:9px 12px;font-size:13px;color:var(--text);resize:none;height:70px;margin-bottom:10px}
+.day-note-input:focus{outline:none;border-color:var(--accent)}
+.day-photo-area{border:2px dashed var(--border);border-radius:var(--rs);padding:14px;text-align:center;cursor:pointer;margin-bottom:10px;transition:.15s}
+.day-photo-area:hover{border-color:var(--accent);background:rgba(0,212,255,.04)}
+.day-photo-preview{width:100%;border-radius:var(--rs);margin-bottom:8px;max-height:180px;object-fit:cover}
+.day-photo-label{font-size:11px;color:var(--muted)}
+.day-photo-icon{font-size:24px;margin-bottom:4px}
+#day-photo-input{display:none}
+
+/* Stats calendario */
+.cal-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.cal-stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;text-align:center}
+.cal-stat-num{font-size:22px;font-weight:900;margin-bottom:2px}
+.cal-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.heatmap-row{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.hm-cell{width:14px;height:14px;border-radius:3px;background:var(--surface3);flex-shrink:0;cursor:pointer;transition:.15s}
+.hm-cell:hover{transform:scale(1.2)}
+.hm-cell.l1{background:rgba(0,212,255,.25)}
+.hm-cell.l2{background:rgba(0,212,255,.5)}
+.hm-cell.l3{background:var(--accent3)}
+.hm-cell.missed{background:rgba(255,68,102,.3)}
+.hm-cell.logro{background:var(--gold)}
+.logros-list{max-height:200px;overflow-y:auto}
+.logro-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border:1px solid rgba(255,215,0,.3);border-radius:var(--rx);margin-bottom:5px}
+.logro-date{font-size:10px;color:var(--gold);font-weight:800;white-space:nowrap}
+.logro-desc{flex:1;font-size:12px}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:60px;margin-bottom:4px}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+.bar-fill{width:100%;border-radius:3px 3px 0 0;background:linear-gradient(to top,var(--accent2),var(--accent));min-height:2px;transition:height .4s}
+.bar-lbl{font-size:8px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body id="body">
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-badge">Z46</div>
+      <div>
+        <div class="sidebar-name">Z46 Dashboard</div>
+        <div class="sidebar-sub">4to Año · Zamil</div>
+      </div>
+    </div>
+    <div class="sidebar-xp">
+      <div class="sidebar-xp-label">⚡ XP Total</div>
+      <div class="sidebar-xp-bar"><div class="sidebar-xp-fill" id="sidebar-xp-fill" style="width:0%"></div></div>
+      <div class="sidebar-xp-txt" id="sidebar-xp-txt">0 XP · Nivel 1</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-section">Principal</div>
+    <button class="sidebar-item active" id="si-misiones" onclick="navTo('misiones','si-misiones')">
+      <span class="sidebar-icon">✅</span><span class="sidebar-lbl">Misiones del día</span>
+    </button>
+    <button class="sidebar-item" id="si-finanzas" onclick="navTo('finanzas','si-finanzas')">
+      <span class="sidebar-icon">💰</span><span class="sidebar-lbl">Finanzas & Metas</span>
+    </button>
+    <button class="sidebar-item" id="si-pomodoro" onclick="navTo('pomodoro','si-pomodoro')">
+      <span class="sidebar-icon">⏱️</span><span class="sidebar-lbl">Pomodoro</span>
+    </button>
+
+    <div class="sidebar-section">Odontología</div>
+    <button class="sidebar-item" id="si-materiales" onclick="navTo('materiales','si-materiales')">
+      <span class="sidebar-icon">🦷</span><span class="sidebar-lbl">Materiales</span>
+    </button>
+    <button class="sidebar-item" id="si-laboratorio" onclick="navTo('laboratorio','si-laboratorio')">
+      <span class="sidebar-icon">🔬</span><span class="sidebar-lbl">Lab · Habilidades</span>
+    </button>
+
+    <div class="sidebar-section">Personal</div>
+    <button class="sidebar-item" id="si-ejercicio" onclick="navTo('ejercicio','si-ejercicio')">
+      <span class="sidebar-icon">💪</span><span class="sidebar-lbl">Ejercicio · Fase 1</span>
+    </button>
+    <button class="sidebar-item" id="si-lectura" onclick="navTo('lectura','si-lectura')">
+      <span class="sidebar-icon">📚</span><span class="sidebar-lbl">Lectura</span>
+    </button>
+    <button class="sidebar-item" id="si-redes" onclick="navTo('redes','si-redes')">
+      <span class="sidebar-icon">📱</span><span class="sidebar-lbl">Redes & IA</span><span class="sidebar-badge-pill">Pronto</span>
+    </button>
+
+    <div class="sidebar-section">Próximamente</div>
+    <button class="sidebar-item" id="si-horario" onclick="navTo('horario','si-horario')">
+      <span class="sidebar-icon">📅</span><span class="sidebar-lbl">Calendario</span>
+    </button>
+    <button class="sidebar-item locked-si" onclick="closeSidebar();showLocked('Meditación','Completa 7 días de meditación de 5 minutos','🧘','7 días meditando')">
+      <span class="sidebar-icon">🧘</span><span class="sidebar-lbl">Meditación</span><span class="sidebar-badge-pill">🔒</span>
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-theme">
+      <span class="sidebar-theme-lbl" id="theme-lbl">🌙 Modo oscuro</span>
+      <div class="theme-toggle">
+        <div class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()">
+          <div class="theme-toggle-knob"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="hdr-left">
+      <button class="hamburger" onclick="openSidebar()" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="logo">
+        <div class="logo-badge">Z46</div>
+        <div>
+          <div class="logo-name">Z46</div>
+          <div class="logo-sub">Dashboard · 4to Año · Zamil</div>
+        </div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="date-chip" id="date-chip"></div>
+    </div>
+  </div>
+  <div class="xp-row">
+    <div class="xp-label">⚡ XP</div>
+    <div class="xp-bar-wrap"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    <div class="xp-pct" id="xp-pct">0 XP · Nv.1</div>
+  </div>
+</div>
+
+<!-- DOLAR BAR -->
+<div class="dolar-bar">
+  <span class="dolar-label">💵 BCV:</span>
+  <span class="dolar-val" id="dolar-val">cargando...</span>
+  <span class="dolar-time" id="dolar-time"></span>
+  <button class="dolar-refresh" onclick="fetchDolar()">↻</button>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn active" onclick="switchPanel('misiones',this)">✅ Misiones</button>
+  <button class="nav-btn" onclick="switchPanel('finanzas',this)">💰 Finanzas</button>
+  <button class="nav-btn" onclick="switchPanel('pomodoro',this)">⏱️ Pomodoro</button>
+  <button class="nav-btn" onclick="switchPanel('ejercicio',this)">💪 Ejercicio</button>
+  <button class="nav-btn" onclick="switchPanel('materiales',this)">🦷 Materiales</button>
+  <button class="nav-btn" onclick="switchPanel('laboratorio',this)">🔬 Lab</button>
+  <button class="nav-btn" onclick="switchPanel('lectura',this)">📚 Lectura</button>
+  <button class="nav-btn" onclick="switchPanel('redes',this)">📱 Redes</button>
+  <button class="nav-btn" onclick="switchPanel('horario',this)">📅 Calendario</button>
+  <button class="nav-btn locked" onclick="showLocked('Meditación','Completa 7 días de misión de meditación','🧘','7 días meditando 5 min')">🧘 Meditar</button>
+</div>
+
+<!-- PANEL MISIONES -->
+<div id="panel-misiones" class="panel active">
+  <div class="sec">
+    <div class="sec-title">🗡️ Misiones del día</div>
+    <div id="misiones-list"></div>
+    <div class="add-mision-row">
+      <input class="mision-input" id="mision-input" type="text" placeholder="Nueva misión..." autocomplete="off">
+      <button class="mision-add-btn" onclick="addMision()">+</button>
+    </div>
+  </div>
+  <div class="sec" style="margin-top:14px">
+    <div class="sec-title">📊 Progreso del día</div>
+    <div class="card" style="padding:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:12px;color:var(--muted)">Completadas</span>
+        <span style="font-size:12px;font-weight:800" id="mis-count">0/0</span>
+      </div>
+      <div class="xp-bar-wrap" style="height:8px"><div class="xp-fill" id="mis-bar" style="width:0%"></div></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;text-align:center" id="xp-min-note">Mínimo 50 XP para que cuente la racha</div>
+    </div>
+  </div>
+  <div class="sec" style="margin-top:4px">
+    <div class="sec-title">🔥 Stats</div>
+    <div class="card" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px">
+      <div style="text-align:center"><div style="font-size:26px;font-weight:900;color:var(--gold)" id="racha-num">0</div><div style="font-size:10px;color:var(--muted)">🔥 Racha</div></div>
+      <div style="text-align:center"><div style="font-size:26px;font-weight:900;color:var(--accent)" id="total-xp-disp">0</div><div style="font-size:10px;color:var(--muted)">⚡ XP hoy</div></div>
+      <div style="text-align:center"><div style="font-size:26px;font-weight:900;color:var(--accent3)" id="mis-done-total">0</div><div style="font-size:10px;color:var(--muted)">✅ Totales</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL FINANZAS -->
+<div id="panel-finanzas" class="panel">
+  <div class="sec">
+    <div class="sec-title">💹 Resumen del mes</div>
+    <div class="fin-summary">
+      <div class="fin-card ing"><div class="fin-card-lbl">Ingresos</div><div class="fin-card-val" id="fin-ing">$0</div></div>
+      <div class="fin-card gas"><div class="fin-card-lbl">Gastos</div><div class="fin-card-val" id="fin-gas">$0</div></div>
+      <div class="fin-card saldo fin-full"><div class="fin-card-lbl">Saldo disponible</div><div class="fin-card-val" id="fin-saldo">$0</div></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">🔄 Conversión rápida</div>
+    <div class="conv-box">
+      <div class="conv-row">
+        <span class="conv-label">USD $</span>
+        <input class="conv-input" id="conv-usd" type="number" inputmode="decimal" placeholder="0.00" oninput="convertUSD()">
+      </div>
+      <div class="conv-result" id="conv-bs-result">= Bs. —</div>
+      <div style="margin:8px 0;height:1px;background:var(--border)"></div>
+      <div class="conv-row">
+        <span class="conv-label">Bs.</span>
+        <input class="conv-input" id="conv-bs" type="number" inputmode="decimal" placeholder="0.00" oninput="convertBS()">
+      </div>
+      <div class="conv-result" id="conv-usd-result">= $ —</div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">➕ Registrar movimiento</div>
+    <div class="add-form">
+      <div class="type-row">
+        <button class="type-opt sel-ing" id="tx-ing" onclick="selTxType('ing')">💚 Ingreso</button>
+        <button class="type-opt" id="tx-gas" onclick="selTxType('gas')">🔴 Gasto</button>
+        <button class="type-opt" id="tx-deu" onclick="selTxType('deu')">🟠 Deuda</button>
+      </div>
+      <div class="form-row">
+        <input class="fin-input" id="tx-desc" type="text" placeholder="Descripción..." autocomplete="off">
+      </div>
+      <div class="form-row">
+        <input class="fin-input" id="tx-monto" type="number" inputmode="decimal" min="0" placeholder="Monto">
+        <select class="fin-select" id="tx-moneda">
+          <option value="usd">USD $</option>
+          <option value="bs">Bs.</option>
+        </select>
+      </div>
+      <button class="add-btn" onclick="addTx()">Registrar ✓</button>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">📋 Movimientos</div>
+    <div id="tx-list"><div class="empty-state">Sin movimientos aún</div></div>
+  </div>
+  <div class="sec" style="margin-top:4px">
+    <div class="sec-title">🎯 Metas de ahorro</div>
+    <div id="metas-list"></div>
+    <button class="add-meta-btn" onclick="openMetaModal()">+ Nueva meta de ahorro</button>
+  </div>
+  <div class="sec" style="margin-top:4px">
+    <div class="sec-title">🔴 Deudas activas</div>
+    <div id="deudas-list"></div>
+  </div>
+</div>
+
+<!-- PANEL POMODORO -->
+<div id="panel-pomodoro" class="panel">
+  <div class="sec">
+    <div class="sec-title">⏱️ Pomodoro</div>
+    <div class="pomo-wrap">
+      <div class="pomo-mode-row">
+        <button class="pomo-mode-btn active" onclick="setPomoMode(25,5,'Foco',this)">🧠 25 min</button>
+        <button class="pomo-mode-btn" onclick="setPomoMode(50,10,'Deep Work',this)">⚡ 50 min</button>
+        <button class="pomo-mode-btn" onclick="setPomoMode(15,5,'Estudio',this)">📖 15 min</button>
+      </div>
+      <div class="pomo-ring">
+        <svg viewBox="0 0 186 186">
+          <circle cx="93" cy="93" r="90" stroke="rgba(123,79,255,0.15)" stroke-width="3" fill="none"/>
+          <circle id="pomo-circle" cx="93" cy="93" r="90" stroke-width="3" stroke-dasharray="565.49" stroke-dashoffset="0"/>
+        </svg>
+        <div class="pomo-time" id="pomo-time">25:00</div>
+        <div class="pomo-label" id="pomo-label">LISTO</div>
+      </div>
+      <div class="pomo-btns">
+        <button class="pomo-btn start" id="pomo-start" onclick="togglePomo()">▶ Iniciar</button>
+        <button class="pomo-btn reset" onclick="resetPomo()">↺ Reset</button>
+      </div>
+      <div class="pomo-sessions">Sesiones hoy: <span id="pomo-sess">0</span> 🍅</div>
+    </div>
+  </div>
+  <div class="sec" style="margin-top:4px">
+    <div class="sec-title">💡 Técnica</div>
+    <div class="tip-card"><strong>25 min de foco total</strong> → 5 min descanso → repite 4 veces → descanso largo.<br>Si te distraes, empiezas de nuevo. Sin excepciones. Eso es la disciplina. 🔥</div>
+  </div>
+</div>
+
+<!-- PANEL EJERCICIO -->
+<div id="panel-ejercicio" class="panel">
+  <div class="sec">
+    <div class="sec-title">💪 Fase 1 · Calistenia</div>
+    <div class="fase-badge">⚡ Activo · En casa</div>
+    <div class="tip-card"><strong>Objetivo:</strong> Dejar de hacer 100 fáciles, hacer 10 difíciles.<br>💧 3L agua · Progresa cada semana · Constancia > Intensidad</div>
+    <div id="ejercicio-list"></div>
+  </div>
+  <div class="sec" style="margin-top:4px">
+    <div class="sec-title">🍽️ Nutrición</div>
+    <div class="card" style="padding:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rx);padding:8px;text-align:center"><div style="font-size:9px;color:var(--muted)">Proteína</div><div style="font-size:12px;font-weight:700;color:var(--accent3)">🥚 Huevos · Pollo</div><div style="font-size:9px;color:var(--muted)">palma de tu mano</div></div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rx);padding:8px;text-align:center"><div style="font-size:9px;color:var(--muted)">Carbos</div><div style="font-size:12px;font-weight:700;color:var(--gold)">🍚 Arroz · Avena</div><div style="font-size:9px;color:var(--muted)">2 puños cerrados</div></div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rx);padding:8px;text-align:center"><div style="font-size:9px;color:var(--muted)">Grasas</div><div style="font-size:12px;font-weight:700;color:var(--orange)">🥜 Maní · Aguacate</div><div style="font-size:9px;color:var(--muted)">tu pulgar</div></div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rx);padding:8px;text-align:center"><div style="font-size:9px;color:var(--muted)">Pre-entreno</div><div style="font-size:12px;font-weight:700;color:var(--accent)">🍌 Banano</div><div style="font-size:9px;color:var(--muted)">energía rápida</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sec" style="margin-top:4px">
+    <div class="sec-title">🔒 Fase 2 · Gimnasio</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:14px;opacity:.5;text-align:center"><div style="font-size:24px;margin-bottom:6px">🔒</div><div style="font-size:12px;color:var(--muted)">Completa 30 días de Fase 1</div></div>
+  </div>
+</div>
+
+<!-- PANEL MATERIALES -->
+<div id="panel-materiales" class="panel">
+  <div class="mat-header">
+    <div class="mat-stats">
+      <div class="mat-stat tengo"><div class="mat-stat-num" id="mat-tengo">0</div><div class="mat-stat-lbl">✅ Tengo</div></div>
+      <div class="mat-stat faltan"><div class="mat-stat-num" id="mat-faltan">0</div><div class="mat-stat-lbl">❌ Faltan</div></div>
+      <div class="mat-stat costo"><div class="mat-stat-num" id="mat-costo">$0</div><div class="mat-stat-lbl">💸 Por gastar</div></div>
+    </div>
+    <div>
+      <div class="mat-prog-header">
+        <span style="font-size:11px;color:var(--muted)">Progreso de compra</span>
+        <span style="font-size:11px;font-weight:700;color:var(--accent)" id="mat-pct">0%</span>
+      </div>
+      <div class="mat-prog-bar"><div class="mat-prog-fill" id="mat-prog-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="filters">
+    <button class="fbtn active" onclick="setMatFilter('all',this)">Todos</button>
+    <button class="fbtn" onclick="setMatFilter('have',this)">✅ Tengo</button>
+    <button class="fbtn" onclick="setMatFilter('miss',this)">❌ Faltan</button>
+    <button class="fbtn" onclick="setMatFilter('instr',this)">🔧 Instrumental</button>
+    <button class="fbtn" onclick="setMatFilter('consum',this)">📦 Insumos</button>
+  </div>
+  <div id="materiales-list"></div>
+  <div style="display:flex;gap:8px;margin-top:4px">
+    <button onclick="openMatItemModal()" style="flex:1;padding:11px;border-radius:var(--rs);background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:13px;font-weight:800;cursor:pointer">+ Añadir material</button>
+    <button onclick="openMatCatModal()" style="padding:11px 14px;border-radius:var(--rs);background:var(--surface2);border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:800;cursor:pointer">📂 Nueva lista</button>
+  </div>
+</div>
+
+<!-- PANEL LABORATORIO -->
+<div id="panel-laboratorio" class="panel">
+  <div class="sec">
+    <div class="sec-title">🦷 Árbol de habilidades · Lab Dental</div>
+    <div class="tip-card">Toca cualquier habilidad para ver sus niveles y requisitos. Los protocolos detallados se desbloquean el <strong>15 de marzo</strong> cuando inicies en el laboratorio. 🔒</div>
+  </div>
+  <div class="sec"><div class="sec-title">⭐ Férulas</div><div class="skill-grid" id="skills-ferulas"></div></div>
+  <div class="sec"><div class="sec-title">👑 Coronas</div><div class="skill-grid" id="skills-coronas"></div></div>
+  <div class="sec"><div class="sec-title">💎 Incrustaciones</div><div class="skill-grid" id="skills-incrustaciones"></div></div>
+  <div class="sec"><div class="sec-title">🦴 Prótesis Removible (Acrílico)</div><div class="skill-grid" id="skills-acrilicos"></div></div>
+  <div class="sec"><div class="sec-title">🔧 Ortopedia</div><div class="skill-grid" id="skills-ortopedia"></div></div>
+</div>
+
+<!-- PANEL LECTURA -->
+<div id="panel-lectura" class="panel">
+  <div class="sec">
+    <div class="sec-title">📚 Libros en curso</div>
+    <div id="books-list"></div>
+  </div>
+  <div class="sec" style="margin-top:4px">
+    <div class="sec-title">🔒 Por leer este año</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;opacity:.6">
+      <div style="font-size:12px;color:var(--muted);text-align:center">Al completar tus libros actuales se desbloquean los siguientes 📖</div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL REDES (BLOQUEADO) -->
+<div id="panel-redes" class="panel">
+  <div class="redes-lock">
+    <div class="redes-lock-icon">📱</div>
+    <div class="redes-lock-title">Módulo en construcción</div>
+    <div class="redes-lock-desc">
+      Esta sección de creación de contenido y redes sociales estará disponible cuando estés listo para subir contenido.<br><br>
+      Aquí podrás generar posts profesionales para Instagram y TikTok, ideas virales y gestionar tu marca dental.
+    </div>
+    <div class="redes-lock-badge">🔒 Disponible próximamente</div>
+  </div>
+</div>
+
+<!-- PANEL LOCKED -->
+<div id="panel-locked" class="panel">
+  <div class="locked-panel">
+    <div class="locked-icon" id="locked-icon">🔒</div>
+    <div class="locked-title" id="locked-title">Módulo bloqueado</div>
+    <div class="locked-desc" id="locked-desc">Completa los requisitos</div>
+    <div class="unlock-date" id="locked-condition">⚡ Condición</div>
+  </div>
+</div>
+
+<!-- WORKOUT MODAL -->
+<div class="modal-overlay" id="workout-modal" onclick="closeModal('workout-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('workout-modal')">✕</button>
+    <div class="modal-title" id="wk-title">Ejercicio</div>
+    <div class="modal-sub" id="wk-sub"></div>
+    <div id="wk-content"></div>
+  </div>
+</div>
+
+<!-- SKILL MODAL -->
+<div class="modal-overlay" id="skill-modal" onclick="closeModal('skill-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('skill-modal')">✕</button>
+    <div id="skill-modal-content"></div>
+  </div>
+</div>
+
+<!-- META MODAL (crear/editar meta) -->
+<div class="modal-overlay" id="meta-modal" onclick="closeModal('meta-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('meta-modal')">✕</button>
+    <div class="modal-title" id="meta-modal-title">🎯 Nueva meta de ahorro</div>
+    <input type="hidden" id="meta-edit-id" value="">
+    <label class="modal-label">Nombre de la meta</label>
+    <input class="modal-input" id="meta-modal-name" type="text" placeholder="Ej: 🦷 Ortodoncia + materiales...">
+    <label class="modal-label">Meta de ahorro (USD $)</label>
+    <input class="modal-input" id="meta-modal-goal" type="number" inputmode="decimal" placeholder="0.00">
+    <label class="modal-label">Ahorrado hasta ahora (USD $)</label>
+    <input class="modal-input" id="meta-modal-saved" type="number" inputmode="decimal" placeholder="0.00">
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModal('meta-modal')">Cancelar</button>
+      <button class="modal-btn confirm" onclick="confirmMeta()">Guardar ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL HORARIO / CALENDARIO -->
+<div id="panel-horario" class="panel">
+
+  <!-- TABS DENTRO DEL PANEL -->
+  <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px">
+    <button class="fbtn active" id="cal-tab-cal" onclick="calTab('cal',this)">📅 Calendario</button>
+    <button class="fbtn" id="cal-tab-stats" onclick="calTab('stats',this)">📊 Estadísticas</button>
+    <button class="fbtn" id="cal-tab-logros" onclick="calTab('logros',this)">🏆 Logros</button>
+    <button class="fbtn" id="cal-tab-galeria" onclick="calTab('galeria',this)">📷 Galería</button>
+  </div>
+
+  <!-- TAB CALENDARIO -->
+  <div id="cal-sub-cal">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calMove(-1)">‹</button>
+      <div class="cal-month" id="cal-month-label">Mes Año</div>
+      <button class="cal-nav-btn" onclick="calMove(1)">›</button>
+    </div>
+
+    <div class="cal-legend">
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(0,255,157,.4)"></div>Día completo</div>
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(0,212,255,.4)"></div>Parcial</div>
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(255,68,102,.3)"></div>Sin completar</div>
+      <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(255,215,0,.5)"></div>🏆 Logro</div>
+      <div class="cal-leg-item"><span style="font-size:11px">📷</span>Con foto</div>
+    </div>
+
+    <div class="cal-grid" id="cal-grid">
+      <!-- días labels -->
+      <div class="cal-day-label">D</div>
+      <div class="cal-day-label">L</div>
+      <div class="cal-day-label">M</div>
+      <div class="cal-day-label">X</div>
+      <div class="cal-day-label">J</div>
+      <div class="cal-day-label">V</div>
+      <div class="cal-day-label">S</div>
+    </div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">📷 Horario de clases</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px">Cuando tengas tu horario de 4to año listo, súbelo aquí. Lo usaré para armar tu calendario de laboratorio automáticamente.</div>
+      <div id="horario-img-preview" style="display:none;margin-bottom:8px">
+        <img id="horario-img" src="" alt="Horario" style="width:100%;border-radius:var(--rx);max-height:200px;object-fit:cover">
+        <button onclick="clearHorarioImg()" style="width:100%;margin-top:6px;padding:6px;border-radius:var(--rx);background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.3);color:var(--red);font-size:11px;font-weight:700;cursor:pointer">🗑️ Quitar foto del horario</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;border:2px dashed var(--border);border-radius:var(--rx);cursor:pointer;transition:.15s" id="horario-upload-label">
+        <span style="font-size:20px">📷</span>
+        <span style="font-size:12px;color:var(--muted)">Toca para subir foto del horario</span>
+        <input type="file" id="horario-file" accept="image/*" style="display:none" onchange="uploadHorarioImg(this)">
+      </label>
+    </div>
+  </div>
+
+  <!-- TAB ESTADÍSTICAS -->
+  <div id="cal-sub-stats" style="display:none">
+    <div class="sec-title" style="margin-bottom:10px">📊 Tu actividad</div>
+    <div class="cal-stats-grid" id="cal-stats-grid">
+      <!-- generado por JS -->
+    </div>
+    <div class="sec-title" style="margin-bottom:8px">📈 Últimas 12 semanas</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:12px;overflow-x:auto">
+      <div class="heatmap-row" id="heatmap-row" style="min-width:280px"></div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:4px">
+        <span>Menos activo</span><span>Más activo</span>
+      </div>
+    </div>
+    <div class="sec-title" style="margin-bottom:8px">📆 Días completados por mes</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:12px">
+      <div class="bar-chart" id="month-bars"></div>
+      <div style="display:flex;gap:4px" id="month-bar-labels"></div>
+    </div>
+    <div class="sec-title" style="margin-bottom:8px">📅 Actividad por día de la semana</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-bottom:10px">
+      <div class="bar-chart" id="weekday-bars"></div>
+      <div style="display:flex;gap:4px" id="weekday-labels"></div>
+    </div>
+  </div>
+
+  <!-- TAB LOGROS -->
+  <div id="cal-sub-logros" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="sec-title" style="margin-bottom:0">🏆 Hitos registrados</div>
+      <button onclick="openLogroModal()" style="padding:7px 12px;border-radius:var(--rx);background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:11px;font-weight:800;cursor:pointer">+ Añadir</button>
+    </div>
+    <div id="logros-list-el"></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;margin-top:8px;font-size:12px;color:var(--muted);line-height:1.6">
+      💡 Los logros también aparecen en el calendario con ⭐. Puedes marcar cualquier día desde el calendario y elegir "🏆 Logro" para registrar un hito especial.
+    </div>
+  </div>
+
+  <!-- TAB GALERÍA -->
+  <div id="cal-sub-galeria" style="display:none">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.6">📷 Aquí aparecen todas las fotos que añadas a los días del calendario. Úsala para mostrar tu progreso en redes.</div>
+    <div id="galeria-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+    <div id="galeria-empty" class="empty-state" style="display:none">
+      <div style="font-size:36px;margin-bottom:8px">📷</div>
+      <div>Aún no has subido fotos.<br>Abre cualquier día del calendario y añade una imagen.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DAY DETAIL MODAL -->
+<div class="modal-overlay" id="day-modal" onclick="closeModal('day-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('day-modal')">✕</button>
+    <div class="modal-title" id="day-modal-title">📅 Día</div>
+    <div class="day-modal-date" id="day-modal-date"></div>
+    <input type="hidden" id="day-modal-key" value="">
+
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:8px">¿Cómo fue este día?</div>
+    <div class="day-status-row">
+      <button class="day-status-opt" id="dst-full" onclick="selDayStatus('full')">✅ Completé todo</button>
+      <button class="day-status-opt" id="dst-partial" onclick="selDayStatus('partial')">⚡ Día parcial</button>
+      <button class="day-status-opt" id="dst-missed" onclick="selDayStatus('missed')">😴 No pude</button>
+      <button class="day-status-opt" id="dst-logro" onclick="selDayStatus('logro')">🏆 Fue un logro</button>
+    </div>
+
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:6px">Nota del día (opcional)</div>
+    <textarea class="day-note-input" id="day-note" placeholder="¿Qué hiciste? ¿Cómo te sentiste? ¿Algún aprendizaje?"></textarea>
+
+    <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);margin-bottom:6px">Foto del día</div>
+    <div class="day-photo-area" onclick="document.getElementById('day-photo-input').click()">
+      <img id="day-photo-preview-img" class="day-photo-preview" src="" alt="" style="display:none">
+      <div id="day-photo-placeholder">
+        <div class="day-photo-icon">📷</div>
+        <div class="day-photo-label">Toca para añadir foto</div>
+      </div>
+    </div>
+    <input type="file" id="day-photo-input" accept="image/*" onchange="loadDayPhoto(this)">
+    <button id="day-photo-clear" onclick="clearDayPhoto()" style="display:none;width:100%;padding:6px;border-radius:var(--rx);background:rgba(255,68,102,.1);border:1px solid rgba(255,68,102,.3);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;margin-bottom:10px">🗑️ Quitar foto</button>
+
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModal('day-modal')">Cancelar</button>
+      <button class="modal-btn confirm" onclick="saveDayData()">Guardar día ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGRO MODAL (añadir hito) -->
+<div class="modal-overlay" id="logro-modal" onclick="closeModal('logro-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('logro-modal')">✕</button>
+    <div class="modal-title">🏆 Registrar logro</div>
+    <label class="modal-label">Fecha</label>
+    <input class="modal-input" id="logro-fecha" type="date">
+    <label class="modal-label">Descripción del logro</label>
+    <input class="modal-input" id="logro-desc" type="text" placeholder="Ej: Primera prótesis completa, 30 días de racha...">
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModal('logro-modal')">Cancelar</button>
+      <button class="modal-btn confirm" onclick="confirmLogro()">Guardar ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAT ITEM MODAL (añadir / editar ítem) -->
+<div class="modal-overlay" id="mat-item-modal" onclick="closeModal('mat-item-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('mat-item-modal')">✕</button>
+    <div class="modal-title" id="mat-item-modal-title">➕ Añadir material</div>
+    <input type="hidden" id="mat-item-edit-id" value="">
+    <label class="modal-label">Nombre del material</label>
+    <input class="modal-input" id="mat-item-name" type="text" placeholder="Ej: Pinza algodonera...">
+    <label class="modal-label">Precio estimado (USD, opcional)</label>
+    <input class="modal-input" id="mat-item-price" type="number" inputmode="decimal" placeholder="0.00">
+    <label class="modal-label">Categoría</label>
+    <select class="modal-input" id="mat-item-cat" style="cursor:pointer"></select>
+    <label class="modal-label">Tipo</label>
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <button id="mat-type-instr" class="type-opt sel-ing" onclick="selectMatType('instr')" style="flex:1">🔧 Instrumental</button>
+      <button id="mat-type-consum" class="type-opt" onclick="selectMatType('consum')" style="flex:1">📦 Insumo/Consumible</button>
+    </div>
+    <input type="hidden" id="mat-item-type" value="instr">
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModal('mat-item-modal')">Cancelar</button>
+      <button class="modal-btn confirm" onclick="confirmMatItem()">Guardar ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAT CAT MODAL (nueva categoría) -->
+<div class="modal-overlay" id="mat-cat-modal" onclick="closeModal('mat-cat-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeModal('mat-cat-modal')">✕</button>
+    <div class="modal-title">📂 Nueva categoría</div>
+    <label class="modal-label">Nombre (puedes usar emoji al inicio)</label>
+    <input class="modal-input" id="mat-cat-name" type="text" placeholder="Ej: 🧪 Diagnóstico...">
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModal('mat-cat-modal')">Cancelar</button>
+      <button class="modal-btn confirm" onclick="confirmMatCat()">Crear ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="bb-item active" id="bb-misiones" onclick="switchPanel('misiones',null);setBB('misiones')"><div class="bb-icon">✅</div><div class="bb-lbl">Misiones</div></button>
+  <button class="bb-item" id="bb-finanzas" onclick="switchPanel('finanzas',null);setBB('finanzas')"><div class="bb-icon">💰</div><div class="bb-lbl">Finanzas</div></button>
+  <button class="bb-item" id="bb-pomodoro" onclick="switchPanel('pomodoro',null);setBB('pomodoro')"><div class="bb-icon">⏱️</div><div class="bb-lbl">Pomodoro</div></button>
+  <button class="bb-item" id="bb-materiales" onclick="switchPanel('materiales',null);setBB('materiales')"><div class="bb-icon">🦷</div><div class="bb-lbl">Materiales</div></button>
+  <button class="bb-item" id="bb-laboratorio" onclick="switchPanel('laboratorio',null);setBB('laboratorio')"><div class="bb-icon">🔬</div><div class="bb-lbl">Lab</div></button>
+</div>
+
+<div class="save-badge" id="save-badge">💾 Guardado</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// LOCALSTORAGE
+// ══════════════════════════════════════════════════
+var SK='z46_v4';
+function lsSave(data){
+  try{localStorage.setItem(SK,JSON.stringify(data));}catch(e){}
+  var b=document.getElementById('save-badge');
+  if(b){b.classList.add('show');clearTimeout(b._t);b._t=setTimeout(function(){b.classList.remove('show');},1400);}
+}
+function lsLoad(){try{var r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch(e){return null;}}
+var _saveT=null;
+function dSave(){clearTimeout(_saveT);_saveT=setTimeout(function(){lsSave(STATE);},600);}
+
+// ── HELPERS ──
+function H(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var toastT=null;
+function showToast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  if(toastT)clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},2400);
+}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+// ── SIDEBAR ──
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+function navTo(panel,siId){
+  closeSidebar();
+  switchPanel(panel,null);
+  setBB(panel);
+  document.querySelectorAll('.sidebar-item').forEach(function(b){b.classList.remove('active');});
+  var el=document.getElementById(siId);if(el)el.classList.add('active');
+  // sync nav bar
+  document.querySelectorAll('.nav-btn').forEach(function(b){
+    b.classList.remove('active');
+    if(b.textContent.toLowerCase().includes(panel.replace('misiones','misiones').replace('finanzas','finanzas')))b.classList.add('active');
+  });
+}
+
+// ── THEME ──
+var isDark=true;
+function toggleTheme(){
+  isDark=!isDark;
+  document.getElementById('body').className=isDark?'':'light';
+  var btn=document.getElementById('theme-toggle-btn');
+  if(btn){if(isDark)btn.classList.remove('on');else btn.classList.add('on');}
+  document.getElementById('theme-lbl').textContent=isDark?'🌙 Modo oscuro':'☀️ Modo claro';
+  STATE.theme=isDark?'dark':'light';dSave();
+}
+
+// ── DATE ──
+(function(){
+  var d=new Date();
+  var dias=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  var meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  document.getElementById('date-chip').textContent=dias[d.getDay()]+' '+d.getDate()+' '+meses[d.getMonth()];
+})();
+
+// ── DOLAR ──
+window.dolarRate=407.37;
+function fetchDolar(){
+  document.getElementById('dolar-val').textContent='cargando...';
+  fetch('https://pydolarve.org/api/v1/dollar?page=bcv')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var rate=d.monitors&&d.monitors.usd?d.monitors.usd.price:null;
+      if(rate){window.dolarRate=parseFloat(rate);document.getElementById('dolar-val').textContent='Bs. '+parseFloat(rate).toFixed(2);document.getElementById('dolar-time').textContent='actualizado';}
+      else throw new Error();
+    })
+    .catch(function(){document.getElementById('dolar-val').textContent='Bs. 407.37';document.getElementById('dolar-time').textContent='manual';});
+}
+fetchDolar();
+function convertUSD(){var v=parseFloat(document.getElementById('conv-usd').value)||0;document.getElementById('conv-bs-result').textContent='= Bs. '+(v*window.dolarRate).toFixed(2);}
+function convertBS(){var v=parseFloat(document.getElementById('conv-bs').value)||0;document.getElementById('conv-usd-result').textContent='= $ '+(v/window.dolarRate).toFixed(2);}
+
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+var DEFAULT_STATE={
+  misiones:[
+    {id:1,label:'🧘 Meditar 5 minutos',sub:'Cierra los ojos, respira y enfócate',done:false,xp:20,type:'meditar'},
+    {id:2,label:'💪 Ejercicio del día',sub:'Toca para ver el workout',done:false,xp:30,type:'workout'},
+    {id:3,label:'📖 Leer 10 páginas del Okeson',sub:'Pág. 30 → meta pág. 40',done:false,xp:20,type:'normal'},
+    {id:4,label:'💧 Tomar 3L de agua',sub:'Hidratación = rendimiento',done:false,xp:10,type:'normal'},
+    {id:5,label:'🚭 No fumar hoy',sub:'Un día más. Tú puedes.',done:false,xp:25,type:'normal'},
+    {id:6,label:'🦷 Estudiar laboratorio',sub:'Revisar protocolos o materiales del día',done:false,xp:20,type:'normal'},
+  ],
+  txs:[],
+  metas:[
+    {id:1,name:'🦷 Ortodoncia + caries + borde incisal',goal:800,saved:0},
+    {id:2,name:'👕 Uniformes (x2)',goal:30,saved:0},
+    {id:3,name:'📱 Teléfono con buena cámara',goal:300,saved:0},
+    {id:4,name:'💻 PC para tesis y casos',goal:400,saved:0},
+    {id:5,name:'🏍️ Moto',goal:2000,saved:0},
+  ],
+  deudas:[
+    {id:1,desc:'Compañera (exodoncia)',monto:25,moneda:'usd'},
+    {id:2,desc:'Regalo hermana pendiente',monto:15,moneda:'usd'},
+  ],
+  books:[
+    {id:1,title:'Oclusión de Okeson',author:'Jeffrey P. Okeson',current:30,total:500,unit:'páginas'},
+    {id:2,title:'La Psicología del Dinero',author:'Morgan Housel',current:4,total:20,unit:'capítulos'},
+  ],
+  materialesHave:{},
+  xpTotal:0,xpHoy:0,racha:0,misDoneTotal:0,pomoSessions:0,
+  ejerciciosDone:[],
+  txType:'ing',nextId:300,
+  meditacionDias:0,
+  theme:'dark',
+  calDays:{},calLogros:[],horarioImg:'',
+  mats:[],
+};
+
+var saved=lsLoad();
+var STATE=saved?mergeState(DEFAULT_STATE,saved):JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+function mergeState(def,saved){
+  var s=JSON.parse(JSON.stringify(def));
+  // Merge carefully — preserve saved data but keep structure
+  if(saved.txs)s.txs=saved.txs;
+  if(saved.metas)s.metas=saved.metas;
+  if(saved.deudas)s.deudas=saved.deudas;
+  if(saved.books)s.books=saved.books;
+  if(saved.materialesHave)s.materialesHave=saved.materialesHave;
+  if(saved.misiones)s.misiones=saved.misiones;
+  if(typeof saved.xpTotal==='number')s.xpTotal=saved.xpTotal;
+  if(typeof saved.xpHoy==='number')s.xpHoy=saved.xpHoy;
+  if(typeof saved.racha==='number')s.racha=saved.racha;
+  if(typeof saved.misDoneTotal==='number')s.misDoneTotal=saved.misDoneTotal;
+  if(typeof saved.pomoSessions==='number')s.pomoSessions=saved.pomoSessions;
+  if(saved.ejerciciosDone)s.ejerciciosDone=saved.ejerciciosDone;
+  if(typeof saved.nextId==='number')s.nextId=saved.nextId;
+  if(typeof saved.meditacionDias==='number')s.meditacionDias=saved.meditacionDias;
+  if(saved.theme)s.theme=saved.theme;
+  if(saved.mats&&saved.mats.length)s.mats=saved.mats;
+  if(saved.calDays)s.calDays=saved.calDays;
+  if(saved.calLogros)s.calLogros=saved.calLogros;
+  if(saved.horarioImg)s.horarioImg=saved.horarioImg;
+  return s;
+}
+
+// Aplicar tema guardado
+if(STATE.theme==='light'){
+  isDark=false;
+  document.getElementById('body').className='light';
+  var tb=document.getElementById('theme-toggle-btn');if(tb)tb.classList.add('on');
+  document.getElementById('theme-lbl').textContent='☀️ Modo claro';
+}
+
+// ══════════════════════════════════════════════════
+// MISIONES
+// ══════════════════════════════════════════════════
+var WORKOUT_DETAIL={
+  label:'💪 Workout · Fase 1 Calistenia',
+  sub:'Completa todas las series para ganar +30 XP',
+  ejercicios:[
+    {name:'Flexiones Arqueras',detail:'Una mano se estira mientras la otra empuja',sets:5,reps:'8-10'},
+    {name:'Sentadilla Búlgara',detail:'Un pie apoyado atrás en una silla',sets:4,reps:'12'},
+    {name:'Fondos en Silla',detail:'Tríceps — baja lento, sube rápido',sets:4,reps:'15'},
+    {name:'Elevación de Piernas',detail:'Colgado en barra o parque, piernas rectas',sets:4,reps:'10'},
+  ]
+};
+
+function buildMisiones(){
+  var list=document.getElementById('misiones-list');
+  list.innerHTML=STATE.misiones.map(function(m){
+    var hasDetail=m.type==='workout'||m.type==='meditar';
+    return '<div class="mision-item'+(m.done?' done':'')+'" id="mis-'+m.id+'">'
+      +'<div class="mision-check" onclick="toggleMision('+m.id+')">'+(m.done?'✓':'')+'</div>'
+      +'<div style="flex:1" onclick="'+(hasDetail?'openMisionDetail('+m.id+')':'toggleMision('+m.id+')')+'\">'
+      +'<div class="mision-label">'+H(m.label)+'</div>'
+      +(m.sub?'<div class="mision-sub">'+H(m.sub)+'</div>':'')
+      +'</div>'
+      +(hasDetail?'<div class="mision-expand" onclick="openMisionDetail('+m.id+')">ver ›</div>':'')
+      +'<div class="mision-xp">+'+m.xp+' XP</div>'
+      +'<button class="mision-del" onclick="delMision('+m.id+')">✕</button>'
+      +'</div>';
+  }).join('');
+  updateMisionStats();
+}
+
+function openMisionDetail(id){
+  var m=STATE.misiones.find(function(x){return x.id===id;});if(!m)return;
+  if(m.type==='workout'){
+    document.getElementById('wk-title').textContent=WORKOUT_DETAIL.label;
+    document.getElementById('wk-sub').textContent=WORKOUT_DETAIL.sub;
+    var html=WORKOUT_DETAIL.ejercicios.map(function(e,ei){
+      var checks='';
+      for(var s=0;s<e.sets;s++)checks+='<div class="set-check" id="wkset-'+ei+'-'+s+'" onclick="toggleSet('+ei+','+s+')"></div>';
+      return '<div class="workout-item"><div class="workout-name">'+e.name+'</div><div class="workout-detail">'+e.detail+'</div><div class="workout-sets">'+e.sets+' series × '+e.reps+' reps</div><div class="workout-check-row">'+checks+'</div></div>';
+    }).join('');
+    document.getElementById('wk-content').innerHTML=html;
+    document.getElementById('workout-modal').classList.add('show');
+  } else if(m.type==='meditar'){
+    document.getElementById('wk-title').textContent='🧘 Meditación · 5 minutos';
+    document.getElementById('wk-sub').textContent='Siéntate cómodo, cierra los ojos y enfócate en tu respiración';
+    document.getElementById('wk-content').innerHTML=
+      '<div class="tip-card" style="margin-bottom:10px"><strong>Técnica básica:</strong><br>1. Inhala por la nariz 4 segundos<br>2. Retén 4 segundos<br>3. Exhala por la boca 8 segundos<br>4. Repite durante 5 minutos</div>'
+      +'<div style="text-align:center;padding:10px"><div style="font-size:14px;color:var(--muted);margin-bottom:12px">Al completar 7 días seguidos desbloqueas el módulo completo 🧠</div><div style="font-size:28px;font-weight:900;color:var(--accent)">'+STATE.meditacionDias+'/7 días</div></div>';
+    document.getElementById('workout-modal').classList.add('show');
+  }
+}
+
+var wkSetsDone={};
+function toggleSet(ei,s){
+  var key=ei+'-'+s;var el=document.getElementById('wkset-'+ei+'-'+s);if(!el)return;
+  if(wkSetsDone[key]){delete wkSetsDone[key];el.classList.remove('done');}
+  else{wkSetsDone[key]=true;el.classList.add('done');}
+}
+
+function toggleMision(id){
+  var m=STATE.misiones.find(function(x){return x.id===id;});if(!m)return;
+  m.done=!m.done;
+  if(m.done){
+    STATE.xpTotal+=m.xp;STATE.xpHoy+=m.xp;STATE.misDoneTotal++;
+    if(m.type==='meditar')STATE.meditacionDias++;
+    showToast('⚡ +'+m.xp+' XP · ¡Misión completada!');
+  } else {
+    STATE.xpTotal=Math.max(0,STATE.xpTotal-m.xp);STATE.xpHoy=Math.max(0,STATE.xpHoy-m.xp);STATE.misDoneTotal=Math.max(0,STATE.misDoneTotal-1);
+    if(m.type==='meditar')STATE.meditacionDias=Math.max(0,STATE.meditacionDias-1);
+  }
+  buildMisiones();updateXP();dSave();
+}
+
+function delMision(id){STATE.misiones=STATE.misiones.filter(function(x){return x.id!==id;});buildMisiones();dSave();}
+
+function addMision(){
+  var inp=document.getElementById('mision-input');var val=inp.value.trim();if(!val)return;
+  STATE.misiones.push({id:++STATE.nextId,label:val,done:false,xp:15,type:'normal'});
+  inp.value='';buildMisiones();dSave();showToast('✅ Misión agregada');
+}
+document.getElementById('mision-input').addEventListener('keydown',function(e){if(e.key==='Enter')addMision();});
+
+function updateMisionStats(){
+  var done=STATE.misiones.filter(function(m){return m.done;}).length;
+  var total=STATE.misiones.length;
+  var pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('mis-count').textContent=done+'/'+total;
+  document.getElementById('mis-bar').style.width=pct+'%';
+  var minXp=STATE.racha<30?50:80;
+  document.getElementById('xp-min-note').textContent='XP hoy: '+STATE.xpHoy+' · Mínimo '+minXp+' XP para contar racha';
+  document.getElementById('racha-num').textContent=STATE.racha;
+  document.getElementById('total-xp-disp').textContent=STATE.xpHoy;
+  document.getElementById('mis-done-total').textContent=STATE.misDoneTotal;
+}
+
+function updateXP(){
+  var xp=STATE.xpTotal;var lvl=Math.floor(xp/500)+1;
+  var pct=Math.min(100,Math.round((xp%500)/500*100));
+  document.getElementById('xp-fill').style.width=pct+'%';
+  document.getElementById('xp-pct').textContent=xp+' XP · Nv.'+lvl;
+  var sf=document.getElementById('sidebar-xp-fill');if(sf)sf.style.width=pct+'%';
+  var st=document.getElementById('sidebar-xp-txt');if(st)st.textContent=xp+' XP · Nivel '+lvl;
+  updateMisionStats();
+}
+
+// ══════════════════════════════════════════════════
+// FINANZAS
+// ══════════════════════════════════════════════════
+var txTypeSelected='ing';
+function selTxType(t){
+  txTypeSelected=t;
+  ['ing','gas','deu'].forEach(function(x){document.getElementById('tx-'+x).className='type-opt'+(t===x?' sel-'+x:'');});
+}
+function toUSD(m,moneda){return moneda==='bs'?m/window.dolarRate:m;}
+
+function addTx(){
+  var desc=document.getElementById('tx-desc').value.trim();
+  var monto=parseFloat(document.getElementById('tx-monto').value)||0;
+  var moneda=document.getElementById('tx-moneda').value;
+  if(!desc||!monto){showToast('⚠️ Completa todos los campos');return;}
+  STATE.txs.unshift({id:++STATE.nextId,type:txTypeSelected,desc:desc,monto:monto,moneda:moneda,date:new Date().toLocaleDateString('es')});
+  if(txTypeSelected==='deu')STATE.deudas.push({id:STATE.nextId,desc:desc,monto:monto,moneda:moneda});
+  document.getElementById('tx-desc').value='';document.getElementById('tx-monto').value='';
+  buildFinanzas();dSave();showToast('✓ Movimiento guardado');
+}
+function delTx(id){STATE.txs=STATE.txs.filter(function(x){return x.id!==id;});buildFinanzas();dSave();}
+function delDeuda(id){STATE.deudas=STATE.deudas.filter(function(x){return x.id!==id;});buildFinanzas();dSave();showToast('🎉 ¡Deuda saldada!');}
+
+function buildFinanzas(){
+  var ing=0,gas=0;
+  STATE.txs.forEach(function(tx){var u=toUSD(tx.monto,tx.moneda);if(tx.type==='ing')ing+=u;else if(tx.type==='gas')gas+=u;});
+  var saldo=ing-gas;
+  document.getElementById('fin-ing').textContent='$'+ing.toFixed(2);
+  document.getElementById('fin-gas').textContent='$'+gas.toFixed(2);
+  var sEl=document.getElementById('fin-saldo');
+  sEl.textContent=(saldo>=0?'$':'-$')+Math.abs(saldo).toFixed(2);
+  sEl.style.color=saldo>=0?'var(--accent3)':'var(--red)';
+  var txEl=document.getElementById('tx-list');
+  if(!STATE.txs.length){txEl.innerHTML='<div class="empty-state">Sin movimientos aún</div>';}
+  else{txEl.innerHTML=STATE.txs.slice(0,15).map(function(tx){
+    var sym=tx.moneda==='usd'?'$':'Bs.';
+    return '<div class="tx-row"><div class="tx-dot '+tx.type+'"></div><div class="tx-desc">'+H(tx.desc)+'<br><span style="font-size:9px;color:var(--muted)">'+tx.date+'</span></div><div class="tx-val '+tx.type+'">'+sym+tx.monto.toFixed(2)+'</div><button class="tx-del" onclick="delTx('+tx.id+')">✕</button></div>';
+  }).join('');}
+  buildMetas();buildDeudas();
+}
+
+// ── METAS AHORRO ──
+function openMetaModal(editId){
+  var modal=document.getElementById('meta-modal');
+  document.getElementById('meta-edit-id').value=editId||'';
+  if(editId){
+    var m=STATE.metas.find(function(x){return x.id===editId;});
+    if(!m)return;
+    document.getElementById('meta-modal-title').textContent='✏️ Editar meta';
+    document.getElementById('meta-modal-name').value=m.name;
+    document.getElementById('meta-modal-goal').value=m.goal;
+    document.getElementById('meta-modal-saved').value=m.saved;
+  } else {
+    document.getElementById('meta-modal-title').textContent='🎯 Nueva meta de ahorro';
+    document.getElementById('meta-modal-name').value='';
+    document.getElementById('meta-modal-goal').value='';
+    document.getElementById('meta-modal-saved').value='';
+  }
+  modal.classList.add('show');
+  setTimeout(function(){document.getElementById('meta-modal-name').focus();},100);
+}
+
+function confirmMeta(){
+  var name=document.getElementById('meta-modal-name').value.trim();
+  var goal=parseFloat(document.getElementById('meta-modal-goal').value)||0;
+  var saved=parseFloat(document.getElementById('meta-modal-saved').value)||0;
+  var editId=document.getElementById('meta-edit-id').value;
+  if(!name||!goal){showToast('⚠️ Completa nombre y meta');return;}
+  if(editId){
+    var m=STATE.metas.find(function(x){return x.id===parseInt(editId)||x.id===editId;});
+    if(m){m.name=name;m.goal=goal;m.saved=saved;showToast('✏️ Meta actualizada');}
+  } else {
+    STATE.metas.push({id:++STATE.nextId,name:name,goal:goal,saved:saved});
+    showToast('🎯 Meta creada');
+  }
+  closeModal('meta-modal');buildMetas();dSave();
+}
+
+function addMetaSave(id){
+  var inp=document.getElementById('meta-inp-'+id);
+  var val=parseFloat(inp.value)||0;if(!val)return;
+  var m=STATE.metas.find(function(x){return x.id===id;});
+  if(m){
+    m.saved=Math.min(m.goal,m.saved+val);
+    inp.value='';buildMetas();dSave();
+    if(m.saved>=m.goal)showToast('🎉 ¡Meta completada! '+m.name);
+    else showToast('💰 +$'+val.toFixed(2)+' ahorrado');
+  }
+}
+
+function deleteMeta(id){
+  if(!confirm('¿Eliminar esta meta?'))return;
+  STATE.metas=STATE.metas.filter(function(x){return x.id!==id;});buildMetas();dSave();showToast('🗑️ Meta eliminada');
+}
+
+function buildMetas(){
+  var el=document.getElementById('metas-list');
+  if(!STATE.metas.length){el.innerHTML='<div class="empty-state">Sin metas aún · Crea la primera 🎯</div>';return;}
+  el.innerHTML=STATE.metas.map(function(m){
+    var pct=m.goal>0?Math.min(100,Math.round(m.saved/m.goal*100)):0;
+    var done=m.saved>=m.goal;
+    return '<div class="meta-item'+(done?' meta-completed':'')+'">'
+      +'<div class="meta-top"><div class="meta-name">'+(done?'✅ ':'')+H(m.name)+'</div><div class="meta-vals">$'+m.saved.toFixed(0)+' / $'+m.goal+'</div></div>'
+      +'<div class="meta-bar-wrap"><div class="meta-bar-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="meta-pct">'+pct+'%'+(done?' · ¡Lograda! 🎉':'')+'</div>'
+      +'<div class="meta-actions">'
+      +'<div class="meta-add-row"><input class="meta-add-input" id="meta-inp-'+m.id+'" type="number" inputmode="decimal" placeholder="Agregar ahorro $"><button class="meta-add-btn" onclick="addMetaSave('+m.id+')">+ Guardar</button></div>'
+      +'<button class="meta-edit-btn" onclick="openMetaModal('+m.id+')" title="Editar">✏️</button>'
+      +'<button class="meta-del-btn" onclick="deleteMeta('+m.id+')" title="Eliminar">🗑️</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function buildDeudas(){
+  var el=document.getElementById('deudas-list');
+  if(!STATE.deudas.length){el.innerHTML='<div class="empty-state">Sin deudas 🎉</div>';return;}
+  el.innerHTML=STATE.deudas.map(function(d){
+    var sym=d.moneda==='usd'?'$':'Bs.';
+    return '<div class="tx-row"><div class="tx-dot deu"></div><div class="tx-desc">'+H(d.desc)+'</div><div class="tx-val deu">'+sym+parseFloat(d.monto).toFixed(2)+'</div><button class="tx-del" onclick="delDeuda('+d.id+')" style="color:var(--accent3)">✓ Pagué</button></div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// POMODORO
+// ══════════════════════════════════════════════════
+var pomoInterval=null,pomoRunning=false,pomoWorkMin=25,pomoBreakMin=5;
+var pomoSecs=25*60,pomoTotal=25*60,pomoIsBreak=false,CIRC=565.49;
+
+function setPomoMode(work,brk,name,btn){
+  if(pomoRunning)return;pomoWorkMin=work;pomoBreakMin=brk;pomoSecs=work*60;pomoTotal=work*60;pomoIsBreak=false;
+  document.querySelectorAll('.pomo-mode-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');updatePomoDisplay();
+}
+function togglePomo(){
+  if(pomoRunning){clearInterval(pomoInterval);pomoRunning=false;document.getElementById('pomo-start').textContent='▶ Continuar';}
+  else{
+    pomoRunning=true;document.getElementById('pomo-start').textContent='⏸ Pausar';
+    pomoInterval=setInterval(function(){
+      pomoSecs--;updatePomoDisplay();
+      if(pomoSecs<=0){
+        clearInterval(pomoInterval);pomoRunning=false;
+        if(!pomoIsBreak){
+          STATE.pomoSessions++;document.getElementById('pomo-sess').textContent=STATE.pomoSessions;
+initCalendar();
+          STATE.xpTotal+=25;STATE.xpHoy+=25;updateXP();showToast('🍅 ¡Pomodoro completo! +25 XP');dSave();
+          pomoIsBreak=true;pomoSecs=pomoBreakMin*60;pomoTotal=pomoBreakMin*60;
+          document.getElementById('pomo-start').textContent='▶ Descanso';
+        } else {
+          pomoIsBreak=false;pomoSecs=pomoWorkMin*60;pomoTotal=pomoWorkMin*60;
+          document.getElementById('pomo-start').textContent='▶ Nueva sesión';showToast('✅ Descansaste — ¡a trabajar!');
+        }
+        updatePomoDisplay();
+      }
+    },1000);
+  }
+}
+function resetPomo(){clearInterval(pomoInterval);pomoRunning=false;pomoIsBreak=false;pomoSecs=pomoWorkMin*60;pomoTotal=pomoWorkMin*60;document.getElementById('pomo-start').textContent='▶ Iniciar';updatePomoDisplay();}
+function updatePomoDisplay(){
+  var m=Math.floor(pomoSecs/60),s=pomoSecs%60;
+  document.getElementById('pomo-time').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  document.getElementById('pomo-label').textContent=pomoIsBreak?'DESCANSO':'FOCO';
+  var off=CIRC-(CIRC*(1-pomoSecs/pomoTotal));
+  document.getElementById('pomo-circle').style.strokeDashoffset=off;
+  document.getElementById('pomo-circle').style.stroke=pomoIsBreak?'var(--accent3)':'var(--accent2)';
+}
+
+// ══════════════════════════════════════════════════
+// EJERCICIO
+// ══════════════════════════════════════════════════
+var EJERCICIOS=[
+  {id:'e1',label:'Flexiones Arqueras',detail:'Una mano se estira, la otra empuja',sets:'5x8-10 reps'},
+  {id:'e2',label:'Sentadilla Búlgara',detail:'Pie apoyado atrás en silla',sets:'4x12 reps'},
+  {id:'e3',label:'Fondos en Silla',detail:'Para tríceps potentes',sets:'4x15 reps'},
+  {id:'e4',label:'Elevación de Piernas',detail:'Colgado en barra o parque',sets:'4x10 reps'},
+];
+function buildEjercicio(){
+  document.getElementById('ejercicio-list').innerHTML=EJERCICIOS.map(function(e){
+    var done=STATE.ejerciciosDone.indexOf(e.id)!==-1;
+    return '<div class="ejercicio-item'+(done?' done':'')+'">'
+      +'<div class="ej-check" onclick="toggleEj(\''+e.id+'\')">'+(done?'✓':'')+'</div>'
+      +'<div style="flex:1"><div class="ej-label">'+e.label+'</div><div class="ej-detail">'+e.detail+'</div></div>'
+      +'<div class="ej-sets">'+e.sets+'</div>'
+      +'</div>';
+  }).join('');
+}
+function toggleEj(id){
+  var idx=STATE.ejerciciosDone.indexOf(id);
+  if(idx===-1){STATE.ejerciciosDone.push(id);STATE.xpTotal+=10;STATE.xpHoy+=10;updateXP();dSave();showToast('💪 +10 XP');}
+  else{STATE.ejerciciosDone.splice(idx,1);STATE.xpTotal=Math.max(0,STATE.xpTotal-10);STATE.xpHoy=Math.max(0,STATE.xpHoy-10);updateXP();}
+  buildEjercicio();
+}
+
+// ══════════════════════════════════════════════════
+// MATERIALES — CRUD COMPLETO
+// ══════════════════════════════════════════════════
+
+// Datos base (se cargan en STATE.mats si existen guardados)
+var DEFAULT_MATS=[
+  {cat:'🔧 Instrumental',type:'instr',id:'m1',name:'Articulador Semiajustable',price:293},
+  {cat:'🔧 Instrumental',type:'instr',id:'m2',name:'Lámpara de Fotocurado',price:245},
+  {cat:'🔧 Instrumental',type:'instr',id:'m3',name:'Micromotor con pieza de mano',price:196},
+  {cat:'🔧 Instrumental',type:'instr',id:'m4',name:'Vibrador de Yeso ECO',price:130},
+  {cat:'🔧 Instrumental',type:'instr',id:'m5',name:'Turbina de alta velocidad',price:61},
+  {cat:'🔧 Instrumental',type:'instr',id:'m6',name:'Espejo bucal',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m7',name:'Explorador dental',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m8',name:'Pinza algodonera',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m9',name:'Sonda periodontal',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m10',name:'Fórceps (juego básico)',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m11',name:'Elevadores (juego básico)',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m12',name:'Atacadores de composite',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m13',name:'Espátulas de cemento',price:null},
+  {cat:'🔧 Instrumental',type:'instr',id:'m14',name:'Porta agujas + tijeras',price:null},
+  {cat:'🦷 Endodoncia',type:'instr',id:'e1',name:'Kit Grapas Fiesta9',price:107},
+  {cat:'🦷 Endodoncia',type:'instr',id:'e2',name:'Limas K-File x6 (surtido)',price:2.77},
+  {cat:'🦷 Endodoncia',type:'consum',id:'e3',name:'Gutapercha 2da serie',price:16},
+  {cat:'🦷 Endodoncia',type:'instr',id:'e4',name:'Cemento sellador endodóntico',price:null},
+  {cat:'🦷 Endodoncia',type:'instr',id:'e5',name:'Regla milimetrada endodóntica',price:null},
+  {cat:'🎨 Composite',type:'consum',id:'r1',name:'Kit Resinas Brilliant',price:17},
+  {cat:'🎨 Composite',type:'consum',id:'r2',name:'Silicona por adición',price:44},
+  {cat:'🎨 Composite',type:'consum',id:'r3',name:'Adhesivo dental 5ta gen',price:null},
+  {cat:'🎨 Composite',type:'consum',id:'r4',name:'Ácido grabador (gel fosfórico)',price:null},
+  {cat:'🎨 Composite',type:'consum',id:'r5',name:'Cemento de fosfato de zinc',price:null},
+  {cat:'🔬 Periodoncia',type:'instr',id:'p1',name:'Curetas Gracey (juego básico)',price:null},
+  {cat:'🔬 Periodoncia',type:'consum',id:'p2',name:'Hilo de sutura 3-0 y 4-0',price:null},
+  {cat:'🔬 Periodoncia',type:'instr',id:'p3',name:'Bisturí mango #3',price:null},
+  {cat:'🔬 Periodoncia',type:'consum',id:'p4',name:'Hojas de bisturí #15',price:0.28},
+  {cat:'📦 Insumos',type:'consum',id:'g1',name:'Gasas estériles x200',price:2.69},
+  {cat:'📦 Insumos',type:'consum',id:'g2',name:'Guantes de látex (caja)',price:null},
+  {cat:'📦 Insumos',type:'consum',id:'g3',name:'Mascarillas (caja)',price:null},
+  {cat:'📦 Insumos',type:'consum',id:'g4',name:'Agujas para carpule (caja)',price:null},
+  {cat:'📦 Insumos',type:'consum',id:'g5',name:'Anestesia (tubos carpule)',price:null},
+  {cat:'📦 Insumos',type:'consum',id:'g6',name:'Rollos de algodón',price:null},
+  {cat:'📦 Insumos',type:'consum',id:'g7',name:'Campo operatorio azul',price:null},
+];
+
+// Inicializar mats desde STATE guardado o usar defaults
+if(!STATE.mats || !STATE.mats.length) STATE.mats = JSON.parse(JSON.stringify(DEFAULT_MATS));
+
+function getMats(){return STATE.mats;}
+
+var matFilter='all';
+function setMatFilter(f,btn){
+  matFilter=f;
+  document.querySelectorAll('.fbtn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  buildMateriales();
+}
+
+// ── Abrir modal ítem ──
+var _matSelectedType='instr';
+function selectMatType(t){
+  _matSelectedType=t;
+  document.getElementById('mat-item-type').value=t;
+  document.getElementById('mat-type-instr').className='type-opt'+(t==='instr'?' sel-ing':'');
+  document.getElementById('mat-type-consum').className='type-opt'+(t==='consum'?' sel-gas':'');
+}
+
+function _fillCatSelect(selectedCat){
+  var cats=[];
+  getMats().forEach(function(m){if(cats.indexOf(m.cat)===-1)cats.push(m.cat);});
+  var sel=document.getElementById('mat-item-cat');
+  sel.innerHTML=cats.map(function(c){
+    return '<option value="'+H(c)+'"'+(c===selectedCat?' selected':'')+'>'+c+'</option>';
+  }).join('');
+}
+
+function openMatItemModal(editId){
+  document.getElementById('mat-item-edit-id').value=editId||'';
+  if(editId){
+    var m=getMats().find(function(x){return x.id===editId;});if(!m)return;
+    document.getElementById('mat-item-modal-title').textContent='✏️ Editar material';
+    document.getElementById('mat-item-name').value=m.name;
+    document.getElementById('mat-item-price').value=m.price||'';
+    _fillCatSelect(m.cat);
+    selectMatType(m.type);
+  } else {
+    document.getElementById('mat-item-modal-title').textContent='➕ Añadir material';
+    document.getElementById('mat-item-name').value='';
+    document.getElementById('mat-item-price').value='';
+    _fillCatSelect('');
+    selectMatType('instr');
+  }
+  document.getElementById('mat-item-modal').classList.add('show');
+  setTimeout(function(){document.getElementById('mat-item-name').focus();},100);
+}
+
+function confirmMatItem(){
+  var name=document.getElementById('mat-item-name').value.trim();
+  var price=parseFloat(document.getElementById('mat-item-price').value)||null;
+  var cat=document.getElementById('mat-item-cat').value;
+  var type=document.getElementById('mat-item-type').value||_matSelectedType;
+  var editId=document.getElementById('mat-item-edit-id').value;
+  if(!name){showToast('⚠️ Escribe un nombre');return;}
+  if(editId){
+    var m=getMats().find(function(x){return x.id===editId;});
+    if(m){m.name=name;m.price=price;m.cat=cat;m.type=type;showToast('✏️ Material actualizado');}
+  } else {
+    var newId='u'+( ++STATE.nextId);
+    STATE.mats.push({cat:cat,type:type,id:newId,name:name,price:price});
+    showToast('✅ '+name+' añadido');
+  }
+  closeModal('mat-item-modal');buildMateriales();dSave();
+}
+
+// ── Eliminar ítem ──
+function delMatItem(id){
+  if(!confirm('¿Eliminar este material de la lista?'))return;
+  STATE.mats=STATE.mats.filter(function(x){return x.id!==id;});
+  delete STATE.materialesHave[id];
+  buildMateriales();dSave();showToast('🗑️ Eliminado');
+}
+
+// ── Nueva categoría ──
+function openMatCatModal(){
+  document.getElementById('mat-cat-name').value='';
+  document.getElementById('mat-cat-modal').classList.add('show');
+  setTimeout(function(){document.getElementById('mat-cat-name').focus();},100);
+}
+function confirmMatCat(){
+  var name=document.getElementById('mat-cat-name').value.trim();
+  if(!name){showToast('⚠️ Escribe un nombre');return;}
+  var cats=[];getMats().forEach(function(m){if(cats.indexOf(m.cat)===-1)cats.push(m.cat);});
+  if(cats.indexOf(name)!==-1){showToast('⚠️ Ya existe esa categoría');return;}
+  // Añadir un ítem placeholder para crear la categoría y que aparezca
+  var newId='u'+(++STATE.nextId);
+  STATE.mats.push({cat:name,type:'instr',id:newId,name:'(primer ítem de '+name+')',price:null});
+  closeModal('mat-cat-modal');buildMateriales();dSave();
+  showToast('📂 Categoría "'+name+'" creada');
+}
+
+// ── Eliminar categoría entera ──
+function delMatCat(cat){
+  if(!confirm('¿Eliminar la categoría "'+cat+'" y todos sus materiales?'))return;
+  var removed=STATE.mats.filter(function(m){return m.cat===cat;});
+  removed.forEach(function(m){delete STATE.materialesHave[m.id];});
+  STATE.mats=STATE.mats.filter(function(m){return m.cat!==cat;});
+  buildMateriales();dSave();showToast('🗑️ Categoría eliminada');
+}
+
+// ── Build ──
+function buildMateriales(){
+  var MATS=getMats();
+  var visible=MATS.filter(function(m){
+    if(matFilter==='all')return true;
+    if(matFilter==='have')return STATE.materialesHave[m.id];
+    if(matFilter==='miss')return !STATE.materialesHave[m.id];
+    if(matFilter==='instr')return m.type==='instr';
+    if(matFilter==='consum')return m.type==='consum';
+    return true;
+  });
+  // Build cats from ALL mats (not just visible) for stats
+  var tengo=0,faltan=0,costo=0;
+  MATS.forEach(function(m){
+    if(STATE.materialesHave[m.id])tengo++;
+    else{faltan++;if(m.price)costo+=m.price;}
+  });
+  document.getElementById('mat-tengo').textContent=tengo;
+  document.getElementById('mat-faltan').textContent=faltan;
+  document.getElementById('mat-costo').textContent='$'+costo.toFixed(0);
+  var total=MATS.length;
+  var pct=total?Math.round(tengo/total*100):0;
+  document.getElementById('mat-pct').textContent=pct+'%';
+  document.getElementById('mat-prog-bar').style.width=pct+'%';
+
+  // Group visible by cat
+  var cats={};
+  var catOrder=[];
+  visible.forEach(function(m){
+    if(!cats[m.cat]){cats[m.cat]=[];catOrder.push(m.cat);}
+    cats[m.cat].push(m);
+  });
+
+  var html='';
+  catOrder.forEach(function(cat){
+    var items=cats[cat];
+    var hc=items.filter(function(m){return STATE.materialesHave[m.id];}).length;
+    var cid='catb_'+cat.replace(/[^\w]/g,'_');
+    html+='<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;overflow:hidden">'
+      // Cabecera categoría
+      +'<div style="display:flex;align-items:center;gap:8px;padding:10px 12px 10px 14px;border-bottom:1px solid var(--border)">'
+      +'<div style="flex:1;font-size:13px;font-weight:800;cursor:pointer" onclick="togCat(\''+cid+'\')">'+H(cat)+'</div>'
+      +'<div style="font-size:11px;color:var(--muted);cursor:pointer" onclick="togCat(\''+cid+'\')">'+hc+'/'+items.length+'</div>'
+      +'<button onclick="openMatItemModal()" title="Añadir ítem a esta categoría" style="width:26px;height:26px;border-radius:50%;background:rgba(0,212,255,.1);border:1px solid rgba(0,212,255,.2);color:var(--accent);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0" data-cat="'+H(cat)+'">+</button>'
+      +'<button onclick="togCat(\''+cid+'\')" style="width:26px;height:26px;border-radius:50%;background:var(--surface3);border:1px solid var(--border);color:var(--muted);font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0"><span id="arr_'+cid+'">▼</span></button>'
+      +'<button onclick="delMatCat(\''+cat.replace(/'/g,"\\'")+'\')" title="Eliminar categoría" style="width:26px;height:26px;border-radius:50%;background:rgba(255,68,102,.08);border:1px solid rgba(255,68,102,.2);color:var(--red);font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">✕</button>'
+      +'</div>'
+      // Ítems
+      +'<div style="display:none;padding:6px 8px 8px" id="'+cid+'">'
+      +items.map(function(m){
+        var h=STATE.materialesHave[m.id];
+        var dotCol=h?'var(--accent3)':m.type==='instr'?'var(--accent)':'var(--orange)';
+        return '<div style="display:flex;align-items:center;gap:7px;padding:7px 8px;background:var(--surface);border-radius:var(--rx);margin-bottom:4px;border:1px solid var(--border);'+(h?'border-color:rgba(0,208,132,.3);background:rgba(0,208,132,.05)':'')+'">'
+          +'<div style="width:3px;height:28px;border-radius:999px;background:'+dotCol+';flex-shrink:0"></div>'
+          // Check
+          +'<div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;'+(h?'background:var(--accent3);border-color:var(--accent3);color:#000':'')+'" onclick="togMat(\''+m.id+'\')">'+(h?'✓':'')+'</div>'
+          // Nombre
+          +'<div style="flex:1;font-size:12px;'+(h?'text-decoration:line-through;opacity:.55':'')+'">'+H(m.name)
+          +'<div style="font-size:9px;color:var(--muted);margin-top:1px">'+(m.type==='instr'?'🔧 Instrumental':'📦 Consumible')+'</div></div>'
+          // Precio
+          +(m.price?'<div style="font-size:11px;font-weight:700;color:var(--gold);white-space:nowrap;margin-right:2px">$'+m.price+'</div>':'<div style="font-size:9px;color:var(--muted2);margin-right:2px">s/p</div>')
+          // Botones editar / eliminar
+          +'<button onclick="openMatItemModal(\''+m.id+'\')" title="Editar" style="width:24px;height:24px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">✏️</button>'
+          +'<button onclick="delMatItem(\''+m.id+'\')" title="Eliminar" style="width:24px;height:24px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0">🗑️</button>'
+          +'</div>';
+      }).join('')+'</div></div>';
+  });
+  var el=document.getElementById('materiales-list');
+  if(el)el.innerHTML=html||'<div class="empty-state">Sin materiales con este filtro</div>';
+
+  // Al hacer click en el + de la cabecera, preseleccionar esa categoría
+  document.querySelectorAll('[data-cat]').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var cat=this.getAttribute('data-cat');
+      // Preseleccionar categoría en el modal
+      openMatItemModal();
+      setTimeout(function(){
+        var sel=document.getElementById('mat-item-cat');
+        for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===cat)sel.selectedIndex=i;}
+      },50);
+    });
+  });
+}
+
+function togCat(id){
+  var el=document.getElementById(id);if(!el)return;
+  var open=el.style.display==='block';
+  el.style.display=open?'none':'block';
+  var a=document.getElementById('arr_'+id);if(a)a.textContent=open?'▼':'▲';
+}
+function togMat(id){
+  if(STATE.materialesHave[id])delete STATE.materialesHave[id];
+  else STATE.materialesHave[id]=true;
+  buildMateriales();dSave();
+  showToast(STATE.materialesHave[id]?'✅ ¡Lo tengo!':'⬜ Desmarcado');
+}
+
+// ══════════════════════════════════════════════════
+// HABILIDADES LAB
+// ══════════════════════════════════════════════════
+var SKILLS={
+  ferulas:[
+    {id:'f1',name:'Férula Silicone',icon:'🫧',price:'$30',levels:['Nv.1 · Haz tu primera férula de silicone','Nv.2 · Completa 3 férulas sin defectos','Nv.3 · Dominas tiempo y material perfectamente'],reqs:['Material: Silicone de laboratorio','Equipo: Prensa o mufla','Tiempo estimado: 45-60 min','Protocolo: Bloqueado hasta 15 marzo 🔒']},
+    {id:'f2',name:'Férula Acetato',icon:'🧊',price:'$30',levels:['Nv.1 · Primera férula de acetato','Nv.2 · Ajuste de borde y pulido limpio','Nv.3 · Adaptación perfecta en modelo'],reqs:['Material: Lámina de acetato 1.5mm','Equipo: Termoformadora','Tiempo estimado: 30-40 min','Protocolo: Bloqueado hasta 15 marzo 🔒']},
+    {id:'f3',name:'Férula Acrílica',icon:'🦷',price:'$60',levels:['Nv.1 · Primera férula acrílica terminada','Nv.2 · Sin burbujas, pulido profesional','Nv.3 · Ajuste oclusal preciso'],reqs:['Material: Acrílico termocurable, monómero','Equipo: Mufla, horno, prensa','Tiempo estimado: 2-3 horas','Protocolo: Bloqueado hasta 15 marzo 🔒']},
+  ],
+  coronas:[
+    {id:'c1',name:'Corona Provisional',icon:'⭕',price:'$15/pza',levels:['Nv.1 · Primera corona provisional','Nv.2 · Ajuste marginal correcto','Nv.3 · Estética y oclusión perfectas'],reqs:['Material: Acrílico provisional','Equipo: Micromotor, fresa','Protocolo: Bloqueado 🔒']},
+    {id:'c2',name:'Metal Acrílico',icon:'🔩',price:'$50/pza',levels:['Nv.1 · Primera corona metal-acrílico','Nv.2 · Colado sin defectos','Nv.3 · Acabado y pulido profesional'],reqs:['Material: Aleación metálica, acrílico','Equipo: Centrífuga, horno','Protocolo: Bloqueado 🔒']},
+    {id:'c3',name:'Metal Cerámica',icon:'✨',price:'$90/pza',levels:['Nv.1 · Primera estratificación','Nv.2 · Cocción sin grietas','Nv.3 · Estética natural perfecta'],reqs:['Material: Cerámica, aleación','Equipo: Horno de cerámica','Protocolo: Bloqueado 🔒']},
+    {id:'c4',name:'Ceramagge/Ceromero',icon:'🌟',price:'$60/pza',levels:['Nv.1 · Primer tallado en ceromero','Nv.2 · Anatomía correcta','Nv.3 · Oclusión y estética perfectas'],reqs:['Material: Ceromero/ceramage','Equipo: Instrumentos de tallado','Protocolo: Bloqueado 🔒']},
+  ],
+  incrustaciones:[
+    {id:'i1',name:'Inlay',icon:'◼',price:'$40',levels:['Nv.1 · Primer inlay terminado','Nv.2 · Ajuste marginal preciso','Nv.3 · Pulido espejo'],reqs:['Material: Cera, revestimiento','Protocolo: Bloqueado 🔒']},
+    {id:'i2',name:'Onlay',icon:'◻',price:'$50',levels:['Nv.1 · Primer onlay terminado','Nv.2 · Cobertura cuspídea correcta','Nv.3 · Ajuste y pulido profesional'],reqs:['Material: Cera, revestimiento','Protocolo: Bloqueado 🔒']},
+    {id:'i3',name:'Overlay',icon:'🔷',price:'$60',levels:['Nv.1 · Primer overlay terminado','Nv.2 · Cobertura total correcta','Nv.3 · Oclusión y estética perfectas'],reqs:['Material: Cera, revestimiento','Protocolo: Bloqueado 🔒']},
+  ],
+  acrilicos:[
+    {id:'a1',name:'PPR Acrílico 1pza',icon:'🦴',price:'$60',levels:['Nv.1 · Primer PPR acrílico','Nv.2 · Ganchos adaptados','Nv.3 · Retención y estabilidad óptimas'],reqs:['Material: Acrílico, ganchos','Protocolo: Bloqueado 🔒']},
+    {id:'a2',name:'PPR Acrílico 2-5pzas',icon:'🦴',price:'$70',levels:['Nv.1 · PPR múltiple terminada','Nv.2 · Plano oclusal correcto','Nv.3 · Articulación perfecta'],reqs:['Material: Acrílico, ganchos múltiples','Protocolo: Bloqueado 🔒']},
+    {id:'a3',name:'Prótesis Total',icon:'😁',price:'$90 c/rodete',levels:['Nv.1 · Primera prótesis total','Nv.2 · Relación maxilomandibular correcta','Nv.3 · Estética y fonética perfectas'],reqs:['Material: Acrílico, dientes artificiales','Protocolo: Bloqueado 🔒']},
+    {id:'a4',name:'PPR Valplast',icon:'🌸',price:'$80-120',levels:['Nv.1 · Primer Valplast terminado','Nv.2 · Adaptación gingival perfecta','Nv.3 · Estética sin metal visible'],reqs:['Material: Resina Valplast','Equipo: Inyectora Valplast','Protocolo: Bloqueado 🔒']},
+  ],
+  ortopedia:[
+    {id:'o1',name:'Retenedor Post-Ortodoncia',icon:'🔗',price:'$70',levels:['Nv.1 · Primer retenedor terminado','Nv.2 · Ajuste y retención correctos','Nv.3 · Doblado de alambres perfecto'],reqs:['Material: Alambre, acrílico','Protocolo: Bloqueado 🔒']},
+    {id:'o2',name:'Expansor (Par)',icon:'🔧',price:'$90',levels:['Nv.1 · Primer expansor terminado','Nv.2 · Activación correcta','Nv.3 · Fabricación autónoma'],reqs:['Material: Tornillo expansor, alambre, acrílico','Protocolo: Bloqueado 🔒']},
+    {id:'o3',name:'Aparato Bimler',icon:'⚙️',price:'$80',levels:['Nv.1 · Primer Bimler terminado','Nv.2 · Ajuste y función correctos','Nv.3 · Fabricación sin guía'],reqs:['Material: Alambres especiales, acrílico','Protocolo: Bloqueado 🔒']},
+  ],
+};
+
+function buildSkills(){
+  Object.keys(SKILLS).forEach(function(cat){
+    var el=document.getElementById('skills-'+cat);if(!el)return;
+    el.innerHTML=SKILLS[cat].map(function(sk){
+      return '<div class="skill-card locked-skill" onclick="openSkill(\''+sk.id+'\')">'
+        +'<div class="skill-icon">'+sk.icon+'</div>'
+        +'<div class="skill-name">'+sk.name+'</div>'
+        +'<div class="skill-price">'+sk.price+'</div>'
+        +'<div class="skill-level">⭐⭐⭐</div>'
+        +'<div class="skill-lock">🔒 Toca para ver</div>'
+        +'</div>';
+    }).join('');
+  });
+}
+
+function openSkill(id){
+  var sk=null;
+  Object.values(SKILLS).forEach(function(arr){arr.forEach(function(s){if(s.id===id)sk=s;});});
+  if(!sk)return;
+  var html='<div>'
+    +'<div class="skill-detail-icon">'+sk.icon+'</div>'
+    +'<div class="skill-detail-name">'+sk.name+'</div>'
+    +'<div class="skill-detail-price">'+sk.price+'</div>'
+    +'<div class="skill-req"><div class="skill-req-title">📋 Requisitos</div>'
+    +sk.reqs.map(function(r){return '<div class="skill-req-item"><span style="font-size:14px">'+(r.includes('🔒')?'🔒':'📌')+'</span>'+r+'</div>';}).join('')
+    +'</div>'
+    +'<div class="skill-levels"><div class="skill-req-title">⚡ Niveles</div>'
+    +sk.levels.map(function(l,i){
+      var parts=l.split('·');
+      return '<div class="skill-level-item"><div class="lvl-badge '+(i===0?'gold':'')+'">'+['I','II','III'][i]+'</div><div class="lvl-info"><div class="lvl-name">'+parts[0].trim()+'</div><div class="lvl-desc">'+(parts[1]||'').trim()+'</div></div></div>';
+    }).join('')+'</div></div>';
+  document.getElementById('skill-modal-content').innerHTML=html;
+  document.getElementById('skill-modal').classList.add('show');
+}
+
+// ══════════════════════════════════════════════════
+// LECTURA
+// ══════════════════════════════════════════════════
+function buildBooks(){
+  document.getElementById('books-list').innerHTML=STATE.books.map(function(b){
+    var pct=Math.round(b.current/b.total*100);
+    return '<div class="book-card">'
+      +'<div class="book-title">📖 '+H(b.title)+'</div>'
+      +'<div class="book-author">'+H(b.author)+'</div>'
+      +'<div class="book-prog"><span class="book-prog-label">Progreso</span><span class="book-prog-val">'+b.current+' / '+b.total+' '+b.unit+' · '+pct+'%</span></div>'
+      +'<div class="book-bar-wrap"><div class="book-bar-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="book-update-row">'
+      +'<input class="book-update-input" id="book-inp-'+b.id+'" type="number" inputmode="decimal" min="0" max="'+b.total+'" placeholder="Actualizar '+(b.unit==='páginas'?'página':'capítulo')+'...">'
+      +'<button class="book-update-btn" onclick="updateBook('+b.id+')">✓ Guardar</button>'
+      +'</div></div>';
+  }).join('');
+}
+function updateBook(id){
+  var inp=document.getElementById('book-inp-'+id);
+  var val=parseInt(inp.value)||0;if(!val)return;
+  var b=STATE.books.find(function(x){return x.id===id;});
+  if(b){b.current=Math.min(b.total,val);inp.value='';if(b.current>=b.total)showToast('🎉 ¡Libro completado! +100 XP');else showToast('📖 Progreso actualizado');buildBooks();dSave();}
+}
+
+// ══════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════
+function switchPanel(name,btn){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-btn:not(.locked)').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('panel-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  // Sync sidebar
+  document.querySelectorAll('.sidebar-item').forEach(function(b){b.classList.remove('active');});
+  var si=document.getElementById('si-'+name);if(si)si.classList.add('active');
+  // rebuild if needed
+  if(name==='materiales')buildMateriales();
+}
+function showLocked(title,desc,icon,cond){
+  document.getElementById('locked-title').textContent='🔒 '+title;
+  document.getElementById('locked-desc').textContent=desc;
+  document.getElementById('locked-icon').textContent=icon;
+  document.getElementById('locked-condition').textContent='⚡ '+cond;
+  switchPanel('locked',null);
+}
+function setBB(name){
+  document.querySelectorAll('.bb-item').forEach(function(b){b.classList.remove('active');});
+  var el=document.getElementById('bb-'+name);if(el)el.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+// CALENDARIO
+// ══════════════════════════════════════════════════
+
+// STATE additions
+if(!STATE.calDays)STATE.calDays={};     // { 'YYYY-MM-DD': {status,note,photo} }
+if(!STATE.calLogros)STATE.calLogros=[]; // [{date,desc}]
+if(!STATE.horarioImg)STATE.horarioImg='';
+
+var calYear=new Date().getFullYear();
+var calMonth=new Date().getMonth(); // 0-based
+var _dayModalStatus='';
+var _dayModalPhoto=''; // base64
+
+var MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DIAS_SHORT=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function calTab(tab,btn){
+  ['cal','stats','logros','galeria'].forEach(function(t){
+    document.getElementById('cal-sub-'+t).style.display=t===tab?'block':'none';
+    var b=document.getElementById('cal-tab-'+t);if(b)b.classList.remove('active');
+  });
+  if(btn)btn.classList.add('active');
+  if(tab==='cal')buildCalendar();
+  if(tab==='stats')buildCalStats();
+  if(tab==='logros')buildLogrosPanel();
+  if(tab==='galeria')buildGaleria();
+}
+
+function calMove(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  buildCalendar();
+}
+
+function buildCalendar(){
+  document.getElementById('cal-month-label').textContent=MESES[calMonth]+' '+calYear;
+  var firstDay=new Date(calYear,calMonth,1).getDay(); // 0=Dom
+  var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  var today=new Date();
+  var todayKey=fmtKey(today);
+
+  // Rebuild grid — keep header labels
+  var grid=document.getElementById('cal-grid');
+  // Remove previous day cells (keep first 7 label divs)
+  var children=Array.from(grid.children);
+  children.slice(7).forEach(function(c){c.remove();});
+
+  // Empty cells before first day
+  for(var i=0;i<firstDay;i++){
+    var blank=document.createElement('div');blank.className='cal-day empty';grid.appendChild(blank);
+  }
+
+  for(var d=1;d<=daysInMonth;d++){
+    var key=calYear+'-'+pad2(calMonth+1)+'-'+pad2(d);
+    var data=STATE.calDays[key]||{};
+    var isToday=(today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d);
+    var isFuture=new Date(calYear,calMonth,d)>today;
+
+    var cls='cal-day';
+    if(isToday)cls+=' today';
+    if(data.status==='full')cls+=' active-full';
+    else if(data.status==='partial')cls+=' active-partial';
+    else if(data.status==='missed')cls+=' missed';
+    if(data.status==='logro')cls+=' logro';
+    if(data.photo)cls+=' has-photo';
+
+    var dotHtml='';
+    if(data.status==='full')dotHtml='<div class="cal-dot full"></div>';
+    else if(data.status==='partial')dotHtml='<div class="cal-dot partial"></div>';
+    else if(data.status==='missed')dotHtml='<div class="cal-dot missed"></div>';
+    else if(data.status==='logro')dotHtml='<div class="cal-dot logro"></div>';
+
+    var cell=document.createElement('div');
+    cell.className=cls;
+    cell.style.background= isFuture&&!isToday?'var(--surface2)':'';
+    cell.style.opacity= isFuture&&!isToday?'.45':'';
+    cell.innerHTML='<div class="cal-day-num">'+d+'</div>'+dotHtml;
+    if(!isFuture||isToday){
+      (function(k,day){cell.onclick=function(){openDayModal(k,day);};})(key,d);
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function pad2(n){return n<10?'0'+n:String(n);}
+function fmtKey(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+function fmtKeyDisplay(key){
+  var p=key.split('-');
+  return DIAS_SHORT[new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])).getDay()]+' '+parseInt(p[2])+' '+MESES[parseInt(p[1])-1]+' '+p[0];
+}
+
+// ── Day modal ──
+function openDayModal(key,day){
+  document.getElementById('day-modal-key').value=key;
+  document.getElementById('day-modal-title').textContent='📅 '+parseInt(key.split('-')[2])+' de '+MESES[parseInt(key.split('-')[1])-1];
+  document.getElementById('day-modal-date').textContent=fmtKeyDisplay(key);
+  var data=STATE.calDays[key]||{};
+  _dayModalStatus=data.status||'';
+  _dayModalPhoto=data.photo||'';
+  document.getElementById('day-note').value=data.note||'';
+  // Status buttons
+  ['full','partial','missed','logro'].forEach(function(s){
+    document.getElementById('dst-'+s).className='day-status-opt'+(s===_dayModalStatus?' sel-'+s:'');
+  });
+  // Photo
+  if(_dayModalPhoto){
+    document.getElementById('day-photo-preview-img').src=_dayModalPhoto;
+    document.getElementById('day-photo-preview-img').style.display='block';
+    document.getElementById('day-photo-placeholder').style.display='none';
+    document.getElementById('day-photo-clear').style.display='block';
+  } else {
+    document.getElementById('day-photo-preview-img').style.display='none';
+    document.getElementById('day-photo-placeholder').style.display='block';
+    document.getElementById('day-photo-clear').style.display='none';
+  }
+  document.getElementById('day-modal').classList.add('show');
+}
+
+function selDayStatus(s){
+  _dayModalStatus=s;
+  ['full','partial','missed','logro'].forEach(function(x){
+    document.getElementById('dst-'+x).className='day-status-opt'+(x===s?' sel-'+x:'');
+  });
+}
+
+function loadDayPhoto(inp){
+  if(!inp.files||!inp.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    _dayModalPhoto=e.target.result;
+    document.getElementById('day-photo-preview-img').src=_dayModalPhoto;
+    document.getElementById('day-photo-preview-img').style.display='block';
+    document.getElementById('day-photo-placeholder').style.display='none';
+    document.getElementById('day-photo-clear').style.display='block';
+  };
+  reader.readAsDataURL(inp.files[0]);
+  inp.value='';
+}
+function clearDayPhoto(){
+  _dayModalPhoto='';
+  document.getElementById('day-photo-preview-img').style.display='none';
+  document.getElementById('day-photo-placeholder').style.display='block';
+  document.getElementById('day-photo-clear').style.display='none';
+}
+
+function saveDayData(){
+  var key=document.getElementById('day-modal-key').value;
+  var note=document.getElementById('day-note').value.trim();
+  if(_dayModalStatus||note||_dayModalPhoto){
+    STATE.calDays[key]={status:_dayModalStatus,note:note,photo:_dayModalPhoto};
+  } else {
+    delete STATE.calDays[key];
+  }
+  closeModal('day-modal');
+  buildCalendar();dSave();
+  showToast(_dayModalStatus==='full'?'✅ ¡Día completo registrado!':_dayModalStatus==='logro'?'🏆 ¡Logro guardado!':'💾 Día guardado');
+}
+
+// ── Horario img ──
+function uploadHorarioImg(inp){
+  if(!inp.files||!inp.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    STATE.horarioImg=e.target.result;
+    document.getElementById('horario-img').src=e.target.result;
+    document.getElementById('horario-img-preview').style.display='block';
+    document.getElementById('horario-upload-label').style.display='none';
+    dSave();showToast('📷 Horario guardado');
+  };
+  reader.readAsDataURL(inp.files[0]);
+  inp.value='';
+}
+function clearHorarioImg(){
+  STATE.horarioImg='';
+  document.getElementById('horario-img-preview').style.display='none';
+  document.getElementById('horario-upload-label').style.display='flex';
+  dSave();showToast('🗑️ Foto del horario eliminada');
+}
+
+// ── Logros ──
+function openLogroModal(){
+  var today=new Date();
+  document.getElementById('logro-fecha').value=today.getFullYear()+'-'+pad2(today.getMonth()+1)+'-'+pad2(today.getDate());
+  document.getElementById('logro-desc').value='';
+  document.getElementById('logro-modal').classList.add('show');
+  setTimeout(function(){document.getElementById('logro-desc').focus();},100);
+}
+function confirmLogro(){
+  var fecha=document.getElementById('logro-fecha').value;
+  var desc=document.getElementById('logro-desc').value.trim();
+  if(!fecha||!desc){showToast('⚠️ Completa los campos');return;}
+  STATE.calLogros.push({date:fecha,desc:desc,id:++STATE.nextId});
+  // Marcar el día también como logro
+  if(!STATE.calDays[fecha])STATE.calDays[fecha]={};
+  STATE.calDays[fecha].status='logro';
+  if(!STATE.calDays[fecha].note)STATE.calDays[fecha].note=desc;
+  closeModal('logro-modal');
+  buildLogrosPanel();buildCalendar();dSave();showToast('🏆 ¡Logro registrado!');
+}
+function delLogro(id){
+  STATE.calLogros=STATE.calLogros.filter(function(l){return l.id!==id;});
+  buildLogrosPanel();dSave();showToast('🗑️ Logro eliminado');
+}
+function buildLogrosPanel(){
+  var el=document.getElementById('logros-list-el');
+  if(!STATE.calLogros.length){el.innerHTML='<div class="empty-state"><div style="font-size:36px;margin-bottom:8px">🏆</div><div>Aún no hay logros.<br>Cada gran paso cuenta.</div></div>';return;}
+  var sorted=STATE.calLogros.slice().sort(function(a,b){return b.date.localeCompare(a.date);});
+  el.innerHTML=sorted.map(function(l){
+    return '<div class="logro-item"><div style="font-size:20px">🏆</div><div style="flex:1"><div style="font-size:12px;font-weight:700">'+H(l.desc)+'</div><div class="logro-date">'+fmtKeyDisplay(l.date)+'</div></div><button onclick="delLogro('+l.id+')" style="font-size:11px;color:var(--muted);padding:4px 6px;background:var(--surface3);border-radius:4px;cursor:pointer">✕</button></div>';
+  }).join('');
+}
+
+// ── Estadísticas ──
+function buildCalStats(){
+  var days=STATE.calDays;
+  var keys=Object.keys(days);
+  var total=keys.length;
+  var full=keys.filter(function(k){return days[k].status==='full';}).length;
+  var partial=keys.filter(function(k){return days[k].status==='partial';}).length;
+  var missed=keys.filter(function(k){return days[k].status==='missed';}).length;
+  var logros=STATE.calLogros.length;
+  var withPhoto=keys.filter(function(k){return days[k].photo;}).length;
+
+  // Racha actual
+  var streak=0;var d=new Date();
+  while(true){
+    var k=fmtKey(d);var st=days[k]?days[k].status:'';
+    if(st==='full'||st==='partial'||st==='logro'){streak++;d.setDate(d.getDate()-1);}
+    else break;
+  }
+
+  var statsGrid=document.getElementById('cal-stats-grid');
+  statsGrid.innerHTML=[
+    {num:full,lbl:'Días completos',col:'var(--accent3)'},
+    {num:partial,lbl:'Días parciales',col:'var(--accent)'},
+    {num:missed,lbl:'Días sin completar',col:'var(--red)'},
+    {num:logros,lbl:'Logros registrados',col:'var(--gold)'},
+    {num:streak,lbl:'Racha actual',col:'var(--orange)'},
+    {num:withPhoto,lbl:'Fotos subidas',col:'var(--accent2)'},
+  ].map(function(s){
+    return '<div class="cal-stat-card"><div class="cal-stat-num" style="color:'+s.col+'">'+s.num+'</div><div class="cal-stat-lbl">'+s.lbl+'</div></div>';
+  }).join('');
+
+  // Heatmap — últimas 84 celdas (12 semanas)
+  var hm=document.getElementById('heatmap-row');
+  hm.innerHTML='';
+  var base=new Date();base.setDate(base.getDate()-83);
+  for(var i=0;i<84;i++){
+    var hk=fmtKey(base);
+    var hd=days[hk];
+    var cls='hm-cell';
+    if(hd){
+      if(hd.status==='full')cls+=' l3';
+      else if(hd.status==='partial')cls+=' l2';
+      else if(hd.status==='missed')cls+=' missed';
+      else if(hd.status==='logro')cls+=' logro';
+      else cls+=' l1';
+    }
+    var cell=document.createElement('div');cell.className=cls;
+    if(hd&&hd.note)cell.title=hk+': '+hd.note;
+    hm.appendChild(cell);
+    base.setDate(base.getDate()+1);
+  }
+
+  // Barras por mes (últimos 6 meses)
+  var barContainer=document.getElementById('month-bars');
+  var barLabels=document.getElementById('month-bar-labels');
+  barContainer.innerHTML='';barLabels.innerHTML='';
+  var monthData=[];
+  for(var mi=5;mi>=0;mi--){
+    var md=new Date();md.setDate(1);md.setMonth(md.getMonth()-mi);
+    var my=md.getFullYear(),mm=md.getMonth();
+    var dim=new Date(my,mm+1,0).getDate();
+    var cnt=0;
+    for(var dd=1;dd<=dim;dd++){
+      var mk=my+'-'+pad2(mm+1)+'-'+pad2(dd);
+      if(days[mk]&&(days[mk].status==='full'||days[mk].status==='logro'))cnt++;
+    }
+    monthData.push({cnt:cnt,label:MESES[mm].substring(0,3),max:dim});
+  }
+  var maxCnt=Math.max.apply(null,monthData.map(function(x){return x.cnt;}));maxCnt=maxCnt||1;
+  monthData.forEach(function(m){
+    var pct=Math.round(m.cnt/maxCnt*100);
+    var bar=document.createElement('div');bar.className='bar-col';
+    bar.innerHTML='<div class="bar-fill" style="height:'+Math.max(4,pct*0.56)+'px"></div><div class="bar-lbl">'+m.cnt+'</div>';
+    barContainer.appendChild(bar);
+    var lbl=document.createElement('div');lbl.className='bar-lbl';lbl.style.flex='1';lbl.style.textAlign='center';lbl.textContent=m.label;
+    barLabels.appendChild(lbl);
+  });
+
+  // Barras por día de semana
+  var wdContainer=document.getElementById('weekday-bars');
+  var wdLabels=document.getElementById('weekday-labels');
+  wdContainer.innerHTML='';wdLabels.innerHTML='';
+  var wdCounts=[0,0,0,0,0,0,0];
+  Object.keys(days).forEach(function(k){
+    var st=days[k].status;
+    if(st==='full'||st==='logro'){
+      var p=k.split('-');var wd=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])).getDay();
+      wdCounts[wd]++;
+    }
+  });
+  var maxWd=Math.max.apply(null,wdCounts);maxWd=maxWd||1;
+  ['D','L','M','X','J','V','S'].forEach(function(lbl,i){
+    var pct=Math.round(wdCounts[i]/maxWd*100);
+    var bar=document.createElement('div');bar.className='bar-col';
+    bar.innerHTML='<div class="bar-fill" style="height:'+Math.max(4,pct*0.56)+'px"></div><div class="bar-lbl">'+wdCounts[i]+'</div>';
+    wdContainer.appendChild(bar);
+    var l=document.createElement('div');l.className='bar-lbl';l.style.flex='1';l.style.textAlign='center';l.textContent=lbl;
+    wdLabels.appendChild(l);
+  });
+}
+
+// ── Galería ──
+function buildGaleria(){
+  var grid=document.getElementById('galeria-grid');
+  var empty=document.getElementById('galeria-empty');
+  var photos=[];
+  Object.keys(STATE.calDays).forEach(function(k){
+    if(STATE.calDays[k].photo)photos.push({key:k,photo:STATE.calDays[k].photo,note:STATE.calDays[k].note||''});
+  });
+  photos.sort(function(a,b){return b.key.localeCompare(a.key);});
+  if(!photos.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=photos.map(function(p){
+    return '<div style="position:relative;border-radius:var(--rs);overflow:hidden;border:1px solid var(--border)">'
+      +'<img src="'+p.photo+'" style="width:100%;aspect-ratio:1;object-fit:cover;display:block">'
+      +'<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);padding:6px 8px">'
+      +'<div style="font-size:9px;color:rgba(255,255,255,.8);font-weight:700">'+fmtKeyDisplay(p.key)+'</div>'
+      +(p.note?'<div style="font-size:9px;color:rgba(255,255,255,.6);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">'+H(p.note)+'</div>':'')
+      +'</div></div>';
+  }).join('');
+}
+
+// Restaurar horario img al cargar
+function initCalendar(){
+  if(STATE.horarioImg){
+    document.getElementById('horario-img').src=STATE.horarioImg;
+    document.getElementById('horario-img-preview').style.display='block';
+    document.getElementById('horario-upload-label').style.display='none';
+  }
+  buildCalendar();
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+buildMisiones();
+buildFinanzas();
+buildEjercicio();
+buildSkills();
+buildBooks();
+buildMateriales();
+updatePomoDisplay();
+updateXP();
+document.getElementById('pomo-sess').textContent=STATE.pomoSessions;
+initCalendar();
+</script>
+</body>
+</html>
