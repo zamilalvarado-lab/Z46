@@ -153,6 +153,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .lvl-name{font-size:12px;font-weight:700}
 .lvl-desc{font-size:10px;color:var(--muted)}
 
+
+.fin-tabs{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.fin-tabs::-webkit-scrollbar{display:none}
+.fin-tab{padding:7px 14px;border-radius:999px;border:1.5px solid var(--border);font-size:11px;font-weight:800;color:var(--muted);white-space:nowrap;transition:.15s;flex-shrink:0}
+.fin-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,.08)}
+.fin-sub{display:none}.fin-sub.active{display:block;animation:fadeIn .15s ease}
 /* FINANZAS */
 .fin-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .fin-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:12px;text-align:center}
@@ -535,10 +541,27 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div class="bb-item" id="bb-laboratorio" onclick="switchPanel('laboratorio',null);setBB('laboratorio')"><div class="bb-icon">🦷</div><div class="bb-lbl">Lab</div></div>
 </div>
 
+
+<div class="save-badge" id="save-badge">💾 Guardado</div>
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
+// ══════════════════════════════════════
+// LOCALSTORAGE PERSISTENCE
+// ══════════════════════════════════════
+var SK='z46_v3';
+function lsSave(data){
+  try{localStorage.setItem(SK,JSON.stringify(data));}catch(e){console.warn('Save failed');}
+  var b=document.getElementById('save-badge');
+  if(b){b.classList.add('show');clearTimeout(b._t);b._t=setTimeout(function(){b.classList.remove('show');},1400);}
+}
+function lsLoad(){
+  try{var r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch(e){return null;}
+}
+var _st2=null;
+function dSave(){clearTimeout(_st2);_st2=setTimeout(function(){lsSave(STATE);},600);}
+
 // ── HELPERS ──
 function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 var toastT=null;
@@ -705,16 +728,16 @@ function toggleMision(id){
     STATE.xpTotal=Math.max(0,STATE.xpTotal-m.xp);STATE.xpHoy=Math.max(0,STATE.xpHoy-m.xp);STATE.misDoneTotal=Math.max(0,STATE.misDoneTotal-1);
     if(m.type==='meditar')STATE.meditacionDias=Math.max(0,STATE.meditacionDias-1);
   }
-  buildMisiones();updateXP();
+  buildMisiones();updateXP();dSave();
 }
 
-function delMision(id){STATE.misiones=STATE.misiones.filter(function(x){return x.id!==id;});buildMisiones();}
+function delMision(id){STATE.misiones=STATE.misiones.filter(function(x){return x.id!==id;});buildMisiones();dSave();}
 
 function addMision(){
   var inp=document.getElementById('mision-input');
   var val=inp.value.trim();if(!val)return;
   STATE.misiones.push({id:++STATE.nextId,label:val,done:false,xp:15,type:'normal'});
-  inp.value='';buildMisiones();showToast('✅ Misión agregada');
+  inp.value='';buildMisiones();dSave();showToast('✅ Misión agregada');
 }
 document.getElementById('mision-input').addEventListener('keydown',function(e){if(e.key==='Enter')addMision();});
 
@@ -758,11 +781,11 @@ function addTx(){
   STATE.txs.unshift({id:++STATE.nextId,type:txTypeSelected,desc:desc,monto:monto,moneda:moneda,date:new Date().toLocaleDateString('es')});
   if(txTypeSelected==='deu')STATE.deudas.push({id:STATE.nextId,desc:desc,monto:monto,moneda:moneda});
   document.getElementById('tx-desc').value='';document.getElementById('tx-monto').value='';
-  buildFinanzas();showToast('✓ Movimiento registrado');
+  buildFinanzas();dSave();showToast('✓ Movimiento guardado');
 }
 
-function delTx(id){STATE.txs=STATE.txs.filter(function(x){return x.id!==id;});buildFinanzas();}
-function delDeuda(id){STATE.deudas=STATE.deudas.filter(function(x){return x.id!==id;});buildFinanzas();showToast('🎉 ¡Deuda saldada!');}
+function delTx(id){STATE.txs=STATE.txs.filter(function(x){return x.id!==id;});buildFinanzas();dSave();}
+function delDeuda(id){STATE.deudas=STATE.deudas.filter(function(x){return x.id!==id;});buildFinanzas();dSave();showToast('🎉 ¡Deuda saldada!');}
 
 function buildFinanzas(){
   var ing=0,gas=0;
@@ -796,7 +819,7 @@ function addMetaSave(id){
   var inp=document.getElementById('meta-inp-'+id);
   var val=parseFloat(inp.value)||0;if(!val)return;
   var m=STATE.metas.find(function(x){return x.id===id;});
-  if(m){m.saved+=val;inp.value='';buildMetas();showToast('💰 ¡Ahorro registrado!');}
+  if(m){m.saved+=val;inp.value='';buildMetas();dSave();showToast('💰 ¡Ahorro registrado!');}
 }
 
 function buildDeudas(){
@@ -867,7 +890,7 @@ function buildEjercicio(){
 }
 function toggleEj(id){
   var idx=STATE.ejerciciosDone.indexOf(id);
-  if(idx===-1){STATE.ejerciciosDone.push(id);STATE.xpTotal+=10;STATE.xpHoy+=10;updateXP();showToast('💪 +10 XP');}
+  if(idx===-1){STATE.ejerciciosDone.push(id);STATE.xpTotal+=10;STATE.xpHoy+=10;updateXP();dSave();showToast('💪 +10 XP');}
   else{STATE.ejerciciosDone.splice(idx,1);STATE.xpTotal=Math.max(0,STATE.xpTotal-10);STATE.xpHoy=Math.max(0,STATE.xpHoy-10);updateXP();}
   buildEjercicio();
 }
@@ -969,7 +992,7 @@ function updateBook(id){
     b.current=Math.min(b.total,val);inp.value='';
     if(b.current>=b.total)showToast('🎉 ¡Libro completado! +100 XP');
     else showToast('📖 Progreso actualizado');
-    buildBooks();
+    buildBooks();dSave();
   }
 }
 
@@ -990,6 +1013,98 @@ function showLocked(title,desc,icon,cond){
 function setBB(name){
   document.querySelectorAll('.bb-item').forEach(function(b){b.classList.remove('active');});
   var el=document.getElementById('bb-'+name);if(el)el.classList.add('active');
+}
+
+
+// ══════════════════════════════════════
+// MATERIALES DATA + FUNCTIONS  
+// ══════════════════════════════════════
+var MATS=[
+  {cat:'🔧 Instrumental',id:'m1',name:'Articulador Semiajustable',price:293},
+  {cat:'🔧 Instrumental',id:'m2',name:'Lámpara de Fotocurado',price:245},
+  {cat:'🔧 Instrumental',id:'m3',name:'Micromotor con pieza de mano',price:196},
+  {cat:'🔧 Instrumental',id:'m4',name:'Vibrador de Yeso ECO',price:130},
+  {cat:'🔧 Instrumental',id:'m5',name:'Turbina de alta velocidad',price:61},
+  {cat:'🔧 Instrumental',id:'m6',name:'Espejo bucal',price:null},
+  {cat:'🔧 Instrumental',id:'m7',name:'Explorador dental',price:null},
+  {cat:'🔧 Instrumental',id:'m8',name:'Pinza algodonera',price:null},
+  {cat:'🔧 Instrumental',id:'m9',name:'Sonda periodontal',price:null},
+  {cat:'🔧 Instrumental',id:'m10',name:'Fórceps (juego básico)',price:null},
+  {cat:'🔧 Instrumental',id:'m11',name:'Elevadores (juego básico)',price:null},
+  {cat:'🔧 Instrumental',id:'m12',name:'Atacadores de composite',price:null},
+  {cat:'🔧 Instrumental',id:'m13',name:'Espátulas de cemento',price:null},
+  {cat:'🔧 Instrumental',id:'m14',name:'Porta agujas + tijeras',price:null},
+  {cat:'🦷 Endodoncia',id:'e1',name:'Kit Grapas Fiesta9',price:107},
+  {cat:'🦷 Endodoncia',id:'e2',name:'Limas K-File x6 (surtido)',price:2.77},
+  {cat:'🦷 Endodoncia',id:'e3',name:'Gutapercha 2da serie',price:16},
+  {cat:'🦷 Endodoncia',id:'e4',name:'Cemento sellador endodóntico',price:null},
+  {cat:'🦷 Endodoncia',id:'e5',name:'Regla milimetrada endodóntica',price:null},
+  {cat:'🎨 Composite',id:'r1',name:'Kit Resinas Brilliant',price:17},
+  {cat:'🎨 Composite',id:'r2',name:'Silicona por adición',price:44},
+  {cat:'🎨 Composite',id:'r3',name:'Adhesivo dental 5ta gen',price:null},
+  {cat:'🎨 Composite',id:'r4',name:'Ácido grabador (gel fosfórico)',price:null},
+  {cat:'🎨 Composite',id:'r5',name:'Cemento de fosfato de zinc',price:null},
+  {cat:'🔬 Periodoncia',id:'p1',name:'Curetas Gracey (juego básico)',price:null},
+  {cat:'🔬 Periodoncia',id:'p2',name:'Hilo de sutura 3-0 y 4-0',price:null},
+  {cat:'🔬 Periodoncia',id:'p3',name:'Bisturí mango #3',price:null},
+  {cat:'🔬 Periodoncia',id:'p4',name:'Hojas de bisturí #15',price:0.28},
+  {cat:'📦 Insumos',id:'g1',name:'Gasas estériles x200',price:2.69},
+  {cat:'📦 Insumos',id:'g2',name:'Guantes de látex (caja)',price:null},
+  {cat:'📦 Insumos',id:'g3',name:'Mascarillas (caja)',price:null},
+  {cat:'📦 Insumos',id:'g4',name:'Agujas para carpule (caja)',price:null},
+  {cat:'📦 Insumos',id:'g5',name:'Anestesia (tubos carpule)',price:null},
+  {cat:'📦 Insumos',id:'g6',name:'Rollos de algodón',price:null},
+  {cat:'📦 Insumos',id:'g7',name:'Campo operatorio azul',price:null},
+];
+
+if(!STATE.materialesHave)STATE.materialesHave={};
+
+function buildMateriales(){
+  var cats={};
+  MATS.forEach(function(m){if(!cats[m.cat])cats[m.cat]=[];cats[m.cat].push(m);});
+  var tengo=0,faltan=0,costo=0;
+  MATS.forEach(function(m){
+    if(STATE.materialesHave[m.id])tengo++;
+    else{faltan++;if(m.price)costo+=m.price;}
+  });
+  var tEl=document.getElementById('mat-tengo');
+  var fEl=document.getElementById('mat-faltan');
+  var cEl=document.getElementById('mat-costo');
+  if(tEl)tEl.textContent=tengo;
+  if(fEl)fEl.textContent=faltan;
+  if(cEl)cEl.textContent='$'+costo.toFixed(0);
+  var html='';
+  Object.keys(cats).forEach(function(cat){
+    var items=cats[cat];
+    var hc=items.filter(function(m){return STATE.materialesHave[m.id];}).length;
+    var cid='catb_'+cat.replace(/[^\w]/g,'_');
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;margin-bottom:5px;cursor:pointer" onclick="togCat(\''+cid+'\')">'
+      +'<div style="font-size:13px;font-weight:800">'+cat+'</div>'
+      +'<div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)">'+hc+'/'+items.length+' <span id="arr_'+cid+'">▼</span></div></div>'
+      +'<div style="display:none;margin-bottom:8px" id="'+cid+'">'
+      +items.map(function(m){
+        var h=STATE.materialesHave[m.id];
+        return '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:var(--rx);margin-bottom:4px;border:1px solid var(--border)">'
+          +'<div style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;'+(h?'background:var(--accent3);border-color:var(--accent3);color:#000':'')+'" onclick="togMat(\''+m.id+'\')">'+( h?'✓':'')+'</div>'
+          +'<div style="flex:1;font-size:12px">'+H(m.name)+'</div>'
+          +(m.price?'<div style="font-size:11px;font-weight:700;color:var(--gold);white-space:nowrap">$'+m.price+'</div>':'<div style="font-size:10px;color:var(--muted2)">s/p</div>')
+          +'</div>';
+      }).join('')+'</div>';
+  });
+  var el=document.getElementById('materiales-list');
+  if(el)el.innerHTML=html;
+}
+
+function togCat(id){
+  var el=document.getElementById(id);if(!el)return;
+  var open=el.style.display==='block';
+  el.style.display=open?'none':'block';
+  var a=document.getElementById('arr_'+id);if(a)a.textContent=open?'▼':'▲';
+}
+function togMat(id){
+  if(STATE.materialesHave[id])delete STATE.materialesHave[id];
+  else STATE.materialesHave[id]=true;
+  buildMateriales();dSave();
 }
 
 // ── INIT ──
